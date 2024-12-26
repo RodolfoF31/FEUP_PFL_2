@@ -46,3 +46,13 @@ menu :-
 
     read_number(4, Number),
     menu_option(Number).
+
+start_player_vs_player :-
+    initialize_board(Board),
+    display_board(Board),
+    write('Player vs Player mode is not fully implemented yet.').
+
+menu_option(1) :-
+    write('Starting Player vs Player mode...'), nl,
+    start_player_vs_player.
+
