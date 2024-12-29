@@ -7,8 +7,18 @@
 :- use_module(library(random)).
 :- use_module(library(system)).
 
+
+
 % Main function
 
 play :-
     clear_screen,
     menu.
+
+game_loop(GameState) :-
+    repeat,
+        initialize_game,
+        %input_loop,
+        %display_gameState(GameState),
+    !.
+    

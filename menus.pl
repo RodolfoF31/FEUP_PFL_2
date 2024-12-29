@@ -1,3 +1,60 @@
+
+
+
+%%%% Controller %%%%
+menu :-
+    byte_logo, 
+    % Display the full menu
+    menu_header_format('BYTE GAME'),
+    menu_empty_format,
+    menu_second_header_format('Option' , 'Details'),
+    menu_empty_format,
+    menu_option_format(1, 'Player vs Player'),
+    menu_empty_format,
+    menu_option_format(0, 'EXIT'),
+    menu_empty_format,
+    menu_end_format,
+
+    % Read the user input && selects mode
+    read_number(4, Number),
+    menu_option(Number).
+
+menu_option(1) :-
+
+    write('Starting Player vs Player mode...'), nl,
+    
+    %hardcode but should ask user is wants 8x8 or 10x10
+    initialize_state([Pvp,8],[Board,1]),
+    game_loop.
+
+
+
+
+% INPUT OPERATIONS 
+read_number(UpperBound, Result) :-
+    repeat,
+    format('| Choose an Option (~d-~d) - ', [0, UpperBound]),
+    get_code(ASCIICode),
+    peek_char(Enter),
+    Enter == '\n',
+    char_code(Char, ASCIICode),  % Convert ASCII code to character
+    number_char(Char, Result),   % Convert the character to a number
+    skip_line,
+    UP is UpperBound + 1,
+    % Check if the number is within the bounds (0 to UpperBound)
+    Result >= 0, Result < UP, !.
+
+% Convert a character to a number
+number_char(Char, Result) :-
+    char_code(Char, Code),
+    Result is Code - 48.   % Subtract 48 to convert ASCII of '0'-'9' to the actual number
+
+
+
+
+
+
+%%%% VIEW %%%%
 % draws the byte logo
 byte_logo :-
     write('               ####   ##   ##  ########   ########'), nl,
@@ -27,32 +84,3 @@ menu_second_header_format(Label1, Label2):-
 
 menu_end_format :-
   format( '~`*t~57|~n', []).
-
-
-
-
-menu :-
-    byte_logo, 
-
-    menu_header_format('BYTE GAME'),
-    menu_empty_format,
-    menu_second_header_format('Option' , 'Details'),
-    menu_empty_format,
-    menu_option_format(1, 'Player vs Player'),
-    menu_empty_format,
-    menu_option_format(0, 'EXIT'),
-    menu_empty_format,
-    menu_end_format,
-
-    read_number(4, Number),
-    menu_option(Number).
-
-start_player_vs_player :-
-    initialize_board(Board),
-    display_board(Board),
-    write('Player vs Player mode is not fully implemented yet.').
-
-menu_option(1) :-
-    write('Starting Player vs Player mode...'), nl,
-    start_player_vs_player.
-
