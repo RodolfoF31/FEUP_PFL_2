@@ -20,7 +20,6 @@ col(6, '6').
 col(7, '7').
 col(8, '8').
 
-
 % Initialize an 8x8 empty board
 empty_board([
     [[], [], [], [], [], [], [], []],
@@ -80,7 +79,6 @@ set_black_pieces(Board, UpdatedBoard) :-
     set_piece(Temp10, 2, 6, -1, Temp11),
     set_piece(Temp11, 2, 8, -1, UpdatedBoard).
 
-
 % Replace element in a row
 set_row([_|T], 1, NewElem, [NewElem|T]).
 set_row([H|T], Index, NewElem, [H|R]) :-
@@ -116,5 +114,12 @@ display_cell([Player|_]) :-
     player_char(Player, Char),
     write(' '), write(Char), write(' ').
 
-% Predicate that clears the screen
-clear_screen :- write('\33\[2J'), !.
+clear_screen :- write('\e[2J'), !.
+
+
+% Display the game state
+display_game(GameState) :-
+    GameState = [Board, CurrentPlayer],
+    write('Current Player: '),
+    (CurrentPlayer = 1 -> write('White (O)'); write('Black (X)')), nl, nl,
+    display_board(Board).
