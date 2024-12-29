@@ -17,7 +17,7 @@ play :-
 
 game_loop(GameState) :-
     repeat,
-        initialize_game,
+        display_game(GameState),
         %input_loop,
         %display_gameState(GameState),
     !.

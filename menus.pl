@@ -1,4 +1,5 @@
-
+option_size(1, 8).
+option_size(2, 10).
 
 
 %%%% Controller %%%%
@@ -24,7 +25,8 @@ menu_option(1) :-
     write('Starting Player vs Player mode...'), nl,
     
     %hardcode but should ask user is wants 8x8 or 10x10
-    initialize_state([Pvp,8],[Board,1]),
+    menu_choose_size(Size),
+    initial_state([Pvp,Size],[Board,1]),
     game_loop.
 
 
@@ -84,3 +86,14 @@ menu_second_header_format(Label1, Label2):-
 
 menu_end_format :-
   format( '~`*t~57|~n', []).
+
+menu_choose_size(Size):-
+    menu_header_format('Choose a size to the board'),
+    menu_empty_format,
+    menu_second_header_format('Option', 'Details'),
+    menu_option_format(1, '8x8'),
+    menu_option_format(2, '10x10'),
+    menu_empty_format,
+    menu_option_format(0,'EXIT'),
+    menu_end_format,
+    read_number(2,Size).

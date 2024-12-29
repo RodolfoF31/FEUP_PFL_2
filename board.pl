@@ -11,7 +11,7 @@ initial_state(GameConfig, GameState):-
     
     % Initialize the game state
     GameState = [Board, CurrentPlayer],
-    initialize_board(Board),
+    initialize_board(BoardSize, Board),
     assert(curr_board(Board)),
 
 
@@ -28,6 +28,8 @@ row(5, 'E').
 row(6, 'F').
 row(7, 'G').
 row(8, 'H').
+row(9, 'I').
+row(10, 'J').
 
 
 
@@ -39,9 +41,11 @@ col(5, '5').
 col(6, '6').
 col(7, '7').
 col(8, '8').
+col(9, '9').
+col(10, '10').
 
 % Initialize an 8x8 empty board
-empty_board([
+empty_board_8x8([
     [[], [], [], [], [], [], [], []],
     [[], [], [], [], [], [], [], []],
     [[], [], [], [], [], [], [], []],
@@ -52,10 +56,23 @@ empty_board([
     [[], [], [], [], [], [], [], []]
 ]).
 
+empty_board_10x10([
+    [[], [], [], [], [], [], [], [], [], []],
+    [[], [], [], [], [], [], [], [], [], []],
+    [[], [], [], [], [], [], [], [], [], []],
+    [[], [], [], [], [], [], [], [], [], []],
+    [[], [], [], [], [], [], [], [], [], []],
+    [[], [], [], [], [], [], [], [], [], []],
+    [[], [], [], [], [], [], [], [], [], []],
+    [[], [], [], [], [], [], [], [], [], []],
+    [[], [], [], [], [], [], [], [], [], []],
+    [[], [], [], [], [], [], [], [], [], []]
+]).
+
 % Set initial pieces on the board
-initialize_board(Board) :-
-    empty_board(EmptyBoard),
-    set_pieces(EmptyBoard, Board).
+initialize_board(BoardSize, Board) :-
+    (BoardSize == 8 -> empty_board_8x8(Board);
+     BoardSize == 10 -> empty_board_10x10(Board)).
 
 set_pieces(Board, FinalBoard) :-
     set_white_pieces(Board, TempBoard),
@@ -129,7 +146,8 @@ display_game(GameState) :-
     GameState = [Board, CurrentPlayer],
     write('Current Player: '),
     (CurrentPlayer = 1 -> write('White (O)'); write('Black (X)')), nl, nl,
-    display_board(board(X)).
+    display_board(Board).
+
 
 % Display the board
 display_board(Board) :-
