@@ -10,7 +10,7 @@ initial_state(GameConfig, GameState):-
 
     initialize_board(BoardSize, Board),
 
-    GameState = [Board, CurrentPlayer],
+    GameState = [Board, CurrentPlayer,BoardSize],
 
     write('Initial State: '), write(GameState), nl,
     write('Initial configuration: '), write(GameConfig), nl,   
@@ -75,9 +75,9 @@ empty_board_10x10([
 
 % Set initial pieces on the board
 initialize_board(BoardSize, Board) :-
-    (BoardSize == 8 -> empty_board_8x8(EmptyBoard);
-     BoardSize == 10 -> empty_board_10x10(EmptyBoard)),
-    set_pieces(EmptyBoard, Board).
+    (BoardSize == 8 -> empty_board_8x8(Board);
+     BoardSize == 10 -> empty_board_10x10(Board)).
+    %set_pieces(EmptyBoard, Board).
 
 
 set_pieces(Board, FinalBoard) :-
@@ -149,29 +149,31 @@ next_col(CurrentCol, NextCol) :-
 
 % Display the game state
 display_game(GameState) :-
-    GameState = [Board, CurrentPlayer],
+    GameState = [Board, CurrentPlayer,BoardSize],
     write('Current Player: '), write(CurrentPlayer), nl,
     (CurrentPlayer = 1 -> write('White (O)'); write('Black (X)')), nl, nl,
-    display_board(Board).
+    %call BoardSize
+    display_board(Board,BoardSize).
 
 
 % Display the board
-display_board(Board) :-
+display_board(Board,BoardSize) :-
     clear_screen,
-    write('    A   B   C   D   E   F   G   H'), nl,
-    write('  +---+---+---+---+---+---+---+---+'), nl,
-    display_rows(Board, 8), nl,
-    display_stacks_info(Board, 8, 'A').
+    write('     A   B   C   D   E   F   G   H'), (BoardSize == 10 -> write('   I   J'); true), nl,
 
-display_rows([], _).
-display_rows([Row|Rest], RowLabel) :-
-    write(RowLabel), write(' |'),
+    write('   +---+---+---+---+---+---+---+---+'),(BoardSize == 10 -> write('---+---+'); true), nl,
+    display_rows(Board,BoardSize, BoardSize), nl,
+    display_stacks_info(Board, BoardSize, 'A').
+
+display_rows([], _,BoardSize).
+display_rows([Row|Rest], RowLabel,BoardSize) :-
+    write(RowLabel), (RowLabel \= 10 -> write(' ') ; true), write(' |'),
     display_cells(Row),
     write('|'),  
     nl,
-    write('  +---+---+---+---+---+---+---+---+'), nl,
+    write('   +---+---+---+---+---+---+---+---+'),(BoardSize == 10 -> write('---+---+'); true), nl,
     NextRowLabel is RowLabel - 1,
-    display_rows(Rest, NextRowLabel).
+    display_rows(Rest, NextRowLabel,BoardSize).
 
 display_cells([]).
 display_cells([Cell|Rest]) :-
