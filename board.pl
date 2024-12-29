@@ -8,11 +8,15 @@ initial_state(GameConfig, GameState):-
     % Create the board and player according to the game configuration (mode and boards size)
     GameConfig = [Mode, BoardSize],
 
-    
-    % Initialize the game state
-    GameState = [Board, CurrentPlayer],
     initialize_board(BoardSize, Board),
-    assert(curr_board(Board)),
+
+    GameState = [Board, CurrentPlayer],
+
+    write('Initial State: '), write(GameState), nl,
+    write('Initial configuration: '), write(GameConfig), nl,   
+
+    game_loop(GameState).
+
 
 
 
@@ -71,8 +75,10 @@ empty_board_10x10([
 
 % Set initial pieces on the board
 initialize_board(BoardSize, Board) :-
-    (BoardSize == 8 -> empty_board_8x8(Board);
-     BoardSize == 10 -> empty_board_10x10(Board)).
+    (BoardSize == 8 -> empty_board_8x8(EmptyBoard);
+     BoardSize == 10 -> empty_board_10x10(EmptyBoard)),
+    set_pieces(EmptyBoard, Board).
+
 
 set_pieces(Board, FinalBoard) :-
     set_white_pieces(Board, TempBoard),
@@ -144,7 +150,7 @@ next_col(CurrentCol, NextCol) :-
 % Display the game state
 display_game(GameState) :-
     GameState = [Board, CurrentPlayer],
-    write('Current Player: '),
+    write('Current Player: '), write(CurrentPlayer), nl,
     (CurrentPlayer = 1 -> write('White (O)'); write('Black (X)')), nl, nl,
     display_board(Board).
 
