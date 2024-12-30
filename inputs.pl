@@ -56,7 +56,9 @@ get_player_move(GameState, NewGameState) :-
     read_position(FromRow, FromCol, BoardSize),
     get_piece(Board, FromRow, FromCol, Piece, CurrentPlayer),
     write('--- Piece Selected ---'), nl,
-    get_player_move(GameState, NewGameState).
+    write('------------------------------------------------------------'), nl,
+    NextPlayer is -CurrentPlayer,
+    NewGameState = [Board, NextPlayer, BoardSize].
     %piece_belongs_to_player(Piece, CurrentPlayer), !.
     %format('Player ~w, enter the position to move the piece:~n', [CurrentPlayer]),
     %read_position(ToRow, ToCol, BoardSize),
