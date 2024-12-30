@@ -7,11 +7,9 @@ initial_state(GameConfig, GameState):-
 
     % Create the board and player according to the game configuration (mode and boards size)
     GameConfig = [Mode, BoardSize],
-
+    CurrentPlayer = 1, % Player 1 starts the game
     initialize_board(BoardSize, Board),
-
     GameState = [Board, CurrentPlayer,BoardSize],
-
     write('Initial State: '), write(GameState), nl,
     write('Initial configuration: '), write(GameConfig), nl,   
 
@@ -24,29 +22,29 @@ player_char(0, '').  % Empty tile as a dot
 player_char(1, 'O').  % Player1 is White ('O')
 player_char(-1, 'X'). % Player2 is Black ('X')
 
-row(1, 'A').
-row(2, 'B').
-row(3, 'C').
-row(4, 'D').
-row(5, 'E').
-row(6, 'F').
-row(7, 'G').
-row(8, 'H').
-row(9, 'I').
-row(10, 'J').
+col(1, 'A').
+col(2, 'B').
+col(3, 'C').
+col(4, 'D').
+col(5, 'E').
+col(6, 'F').
+col(7, 'G').
+col(8, 'H').
+col(9, 'I').
+col(10, 'J').
 
 
 
-col(1, '1').
-col(2, '2').
-col(3, '3').
-col(4, '4').
-col(5, '5').
-col(6, '6').
-col(7, '7').
-col(8, '8').
-col(9, '9').
-col(10, '10').
+row(1, '1').
+row(2, '2').
+row(3, '3').
+row(4, '4').
+row(5, '5').
+row(6, '6').
+row(7, '7').
+row(8, '8').
+row(9, '9').
+row(10, '10').
 
 % Initialize an 8x8 empty board
 empty_board_8x8([
@@ -93,7 +91,7 @@ set_piece(Board, Row, Col, Player, UpdatedBoard) :-
     set_row(Board, Row, NewRow, UpdatedBoard).
 
 
-
+%piece(BOARDBEFORE,COL,ROW,STack,BOARDAFTER)
 set_white_pieces(Board, UpdatedBoard, BoardSize) :-
     (BoardSize == 8 ->
         set_piece(Board, 7, 1, [1], Temp1),
@@ -189,23 +187,24 @@ display_game(GameState) :-
 
 
 % Display the board
-display_board(Board,BoardSize) :-
+display_board(Board, BoardSize) :-
     clear_screen,
     write('     A   B   C   D   E   F   G   H'), (BoardSize == 10 -> write('   I   J'); true), nl,
-
-    write('   +---+---+---+---+---+---+---+---+'),(BoardSize == 10 -> write('---+---+'); true), nl,
-    display_rows(Board,BoardSize, BoardSize), nl,
+    write('   +---+---+---+---+---+---+---+---+'), (BoardSize == 10 -> write('---+---+'); true), nl,
+    display_rows(Board, 1, BoardSize), nl,
     display_stacks_info(Board, BoardSize, 'A').
 
-display_rows([], _,BoardSize).
-display_rows([Row|Rest], RowLabel,BoardSize) :-
-    write(RowLabel), (RowLabel \= 10 -> write(' ') ; true), write(' |'),
+display_rows([], _, _).
+display_rows(_, RowLabel, _) :-
+    RowLabel > 10, !.
+display_rows([Row|Rest], RowLabel, BoardSize) :-
+    write(RowLabel), (RowLabel < 10 -> write(' ') ; true), write(' |'),
     display_cells(Row),
     write('|'),  
     nl,
-    write('   +---+---+---+---+---+---+---+---+'),(BoardSize == 10 -> write('---+---+'); true), nl,
-    NextRowLabel is RowLabel - 1,
-    display_rows(Rest, NextRowLabel,BoardSize).
+    write('   +---+---+---+---+---+---+---+---+'), (BoardSize == 10 -> write('---+---+'); true), nl,
+    NextRowLabel is RowLabel + 1,
+    display_rows(Rest, NextRowLabel, BoardSize).
 
 display_cells([]).
 display_cells([Cell|Rest]) :-

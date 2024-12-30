@@ -18,7 +18,7 @@ play :-
 game_loop(GameState) :-
     repeat,
         display_game(GameState),
-        %input_loop,
-        %display_gameState(GameState),
+        get_player_move(GameState, Move),
+        %game_over(GameState, Winner),
     !.
     
