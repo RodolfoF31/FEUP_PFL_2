@@ -129,7 +129,6 @@ merge_stacks(GameState, Player, From, To, NewGameState) :-
     ToHeight < 8,                             % Target stack must have fewer than 8 checkers
     FromHeight + ToHeight =< 8,               % Ensure the resulting stack does not exceed 8
     FromHeight > ToHeight,                    % Ensure the checker is moved to a higher altitude
-    perform_merge(Board, From, To, NewBoard), % Perform the merge
     NewGameState = [NewBoard | Rest].         % Update the game state
 
 % Helper predicate to check adjacency of two positions.
@@ -138,15 +137,7 @@ adjacent(Row1-Col1, Row2-Col2) :-
     DiffCol is abs(Col1 - Col2),
     DiffRow =:= 1, DiffCol =:= 1. % Adjacent squares are diagonal only
 
-% Helper predicate to perform the merge by updating the board.
-perform_merge(Board, RowFrom-ColFrom, RowTo-ColTo, NewBoard) :-
-    nth1(RowFrom, Board, RowListFrom),
-    nth1(ColFrom, RowListFrom, StackFrom),         % Get the source stack
-    nth1(RowTo, Board, RowListTo),
-    nth1(ColTo, RowListTo, StackTo),               % Get the target stack
-    append(StackFrom, StackTo, NewStack),          % Merge stacks with source on top
-    replace(Board, RowFrom-ColFrom, [], TempBoard), % Clear the source square
-    replace(TempBoard, RowTo-ColTo, NewStack, NewBoard).
+
 
 % Get the height of a stack at a specific position.
 stack_height(Board, Row-Col, Height) :-
