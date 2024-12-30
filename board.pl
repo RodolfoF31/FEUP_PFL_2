@@ -75,14 +75,14 @@ empty_board_10x10([
 
 % Set initial pieces on the board
 initialize_board(BoardSize, Board) :-
-    (BoardSize == 8 -> empty_board_8x8(Board);
-     BoardSize == 10 -> empty_board_10x10(Board)).
-    %set_pieces(EmptyBoard, Board).
+    (BoardSize == 8 -> empty_board_8x8(EmptyBoard);
+     BoardSize == 10 -> empty_board_10x10(EmptyBoard)),
+    set_pieces(EmptyBoard, Board, BoardSize).
 
 
-set_pieces(Board, FinalBoard) :-
-    set_white_pieces(Board, TempBoard),
-    set_black_pieces(TempBoard, FinalBoard).
+set_pieces(Board, FinalBoard, BoardSize) :-
+    set_white_pieces(Board, TempBoard, BoardSize),
+    set_black_pieces(TempBoard, FinalBoard, BoardSize).
 
 % Place a piece on the board
 set_piece(Board, Row, Col, Player, UpdatedBoard) :-
@@ -94,34 +94,66 @@ set_piece(Board, Row, Col, Player, UpdatedBoard) :-
 
 
 
-set_white_pieces(Board, UpdatedBoard) :-
-    set_piece(Board, 7, 1, [1], Temp1),
-    set_piece(Temp1, 7, 3, [1], Temp2),
-    set_piece(Temp2, 7, 5, [1], Temp3),
-    set_piece(Temp3, 7, 7, [1], Temp4),
-    set_piece(Temp4, 5, 1, [1], Temp5),
-    set_piece(Temp5, 5, 3, [1], Temp6),
-    set_piece(Temp6, 5, 5, [1], Temp7),
-    set_piece(Temp7, 5, 7, [1], Temp8),
-    set_piece(Temp8, 3, 1, [1], Temp9),
-    set_piece(Temp9, 3, 3, [1], Temp10),
-    set_piece(Temp10, 3, 5, [1], Temp11),
-    set_piece(Temp11, 3, 7, [1], UpdatedBoard).
+set_white_pieces(Board, UpdatedBoard, BoardSize) :-
+    (BoardSize == 8 ->
+        set_piece(Board, 7, 1, [1], Temp1),
+        set_piece(Temp1, 7, 3, [1], Temp2),
+        set_piece(Temp2, 7, 5, [1], Temp3),
+        set_piece(Temp3, 7, 7, [1], Temp4),
+        set_piece(Temp4, 5, 1, [1], Temp5),
+        set_piece(Temp5, 5, 3, [1], Temp6),
+        set_piece(Temp6, 5, 5, [1], Temp7),
+        set_piece(Temp7, 5, 7, [1], Temp8),
+        set_piece(Temp8, 3, 1, [1], Temp9),
+        set_piece(Temp9, 3, 3, [1], Temp10),
+        set_piece(Temp10, 3, 5, [1], Temp11),
+        set_piece(Temp11, 3, 7, [1], UpdatedBoard)
+    ;
+    BoardSize == 10 ->
+        set_piece(Board, 8, 2, [1], Temp1),
+        set_piece(Temp1, 8, 4, [1], Temp2),
+        set_piece(Temp2, 8, 6, [1], Temp3),
+        set_piece(Temp3, 8, 8, [1], Temp4),
+        set_piece(Temp4, 6, 2, [1], Temp5),
+        set_piece(Temp5, 6, 4, [1], Temp6),
+        set_piece(Temp6, 6, 6, [1], Temp7),
+        set_piece(Temp7, 6, 8, [1], Temp8),
+        set_piece(Temp8, 4, 2, [1], Temp9),
+        set_piece(Temp9, 4, 4, [1], Temp10),
+        set_piece(Temp10, 4, 6, [1], Temp11),
+        set_piece(Temp11, 4, 8, [1], UpdatedBoard)
+    ).
 
 % Place Black pieces at the specified positions
-set_black_pieces(Board, UpdatedBoard) :-
-    set_piece(Board, 6, 2, [-1], Temp1),
-    set_piece(Temp1, 6, 4, [-1], Temp2),
-    set_piece(Temp2, 6, 6, [-1], Temp3),
-    set_piece(Temp3, 6, 8, [-1], Temp4),
-    set_piece(Temp4, 4, 2, [-1], Temp5),
-    set_piece(Temp5, 4, 4, [-1], Temp6),
-    set_piece(Temp6, 4, 6, [-1], Temp7),
-    set_piece(Temp7, 4, 8, [-1], Temp8),
-    set_piece(Temp8, 2, 2, [-1], Temp9),
-    set_piece(Temp9, 2, 4, [-1], Temp10),
-    set_piece(Temp10, 2, 6, [-1], Temp11),
-    set_piece(Temp11, 2, 8, [-1], UpdatedBoard).
+set_black_pieces(Board, UpdatedBoard, BoardSize) :-
+    (BoardSize == 8 ->
+        set_piece(Board, 6, 2, [-1], Temp1),
+        set_piece(Temp1, 6, 4, [-1], Temp2),
+        set_piece(Temp2, 6, 6, [-1], Temp3),
+        set_piece(Temp3, 6, 8, [-1], Temp4),
+        set_piece(Temp4, 4, 2, [-1], Temp5),
+        set_piece(Temp5, 4, 4, [-1], Temp6),
+        set_piece(Temp6, 4, 6, [-1], Temp7),
+        set_piece(Temp7, 4, 8, [-1], Temp8),
+        set_piece(Temp8, 2, 2, [-1], Temp9),
+        set_piece(Temp9, 2, 4, [-1], Temp10),
+        set_piece(Temp10, 2, 6, [-1], Temp11),
+        set_piece(Temp11, 2, 8, [-1], UpdatedBoard)
+    ;
+    BoardSize == 10 ->
+        set_piece(Board, 7, 3, [-1], Temp1),
+        set_piece(Temp1, 7, 5, [-1], Temp2),
+        set_piece(Temp2, 7, 7, [-1], Temp3),
+        set_piece(Temp3, 7, 9, [-1], Temp4),
+        set_piece(Temp4, 5, 3, [-1], Temp5),
+        set_piece(Temp5, 5, 5, [-1], Temp6),
+        set_piece(Temp6, 5, 7, [-1], Temp7),
+        set_piece(Temp7, 5, 9, [-1], Temp8),
+        set_piece(Temp8, 3, 3, [-1], Temp9),
+        set_piece(Temp9, 3, 5, [-1], Temp10),
+        set_piece(Temp10, 3, 7, [-1], Temp11),
+        set_piece(Temp11, 3, 9, [-1], UpdatedBoard)
+    ).
 
 % Replace element in a row
 set_row([_|T], 1, NewElem, [NewElem|T]).
