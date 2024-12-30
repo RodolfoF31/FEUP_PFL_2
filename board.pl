@@ -170,11 +170,6 @@ next_col(CurrentCol, NextCol) :-
 
 
 
-
-
-
-
-
 %%%% VIEW %%%%
 
 % Display the game state
@@ -192,7 +187,7 @@ display_board(Board, BoardSize) :-
     write('     A   B   C   D   E   F   G   H'), (BoardSize == 10 -> write('   I   J'); true), nl,
     write('   +---+---+---+---+---+---+---+---+'), (BoardSize == 10 -> write('---+---+'); true), nl,
     display_rows(Board, 1, BoardSize), nl,
-    display_stacks_info(Board, BoardSize, 'A').
+    display_stacks_info(Board, 1, 'A', BoardSize).
 
 display_rows([], _, _).
 display_rows(_, RowLabel, _) :-
@@ -225,19 +220,24 @@ display_cell(Cell) :-
 
 clear_screen :- write('\e[2J'), !.
 
+
+
 % Display stacks information
-display_stacks_info([], _, _).
-display_stacks_info([Row|Rest], RowLabel, ColLabel) :-
-    display_row_stacks_info(Row, RowLabel, ColLabel, 'A'),
-    NextRowLabel is RowLabel - 1,
-    display_stacks_info(Rest, NextRowLabel, ColLabel).
+display_stacks_info([], _, _, _).
+display_stacks_info(_, RowLabel, _, BoardSize) :-
+    RowLabel >= BoardSize, !.
+display_stacks_info([Row|Rest], RowLabel, ColLabel, BoardSize) :-
+    display_row_stacks_info(Row, RowLabel, ColLabel, 1),
+    NextRowLabel is RowLabel + 1,
+    display_stacks_info(Rest, NextRowLabel, ColLabel, BoardSize).
 
 display_row_stacks_info([], _, _, _).
 display_row_stacks_info([Cell|Rest], RowLabel, ColLabel, CurrentCol) :-
     (Cell \= [] ->
         length(Cell, Size),
         maplist(player_char, Cell, CharList), % Map numeric values to characters
-        format('Stack of Row ~w and Column ~w: ~w, Size ~d~n', [RowLabel, CurrentCol, CharList, Size])
+        col(CurrentCol, ColChar),
+        format('Stack of Row ~w and Column ~w: ~w, Size ~d~n', [RowLabel, ColChar, CharList, Size])
     ; true),
-    next_col(CurrentCol, NextCol),
+    NextCol is CurrentCol + 1,
     display_row_stacks_info(Rest, RowLabel, ColLabel, NextCol).
