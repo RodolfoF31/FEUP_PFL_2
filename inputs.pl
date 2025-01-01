@@ -1,12 +1,13 @@
-read_number(Number, Result) :-
+read_optiontoplay(Number, Result) :-
     repeat,
-    format('| Choose an Option (0-~d): ', [Number]),
     get_code(ASCIICode),
-    skip_line,
     char_code(Char, ASCIICode),
     number_char(Char, Result),
     Result >= 0,
-    Result =< Number, !.
+    Result =< Number,
+    skip_line, % Consume the rest of the line
+    !.
+
 
 % Predicate to read a valid row (1-8 or 1-10 depending on the board size)
 read_row(RowIndex, BoardSize) :-
@@ -64,9 +65,8 @@ get_player_action(GameState, FromRow, FromCol, BoardSize) :-
     write('| Choose an action: '), nl,
     write('| 1 - Basic Move'), nl,
     write('| 2 - Merge'), nl,
-    repeat,
     write('| Enter your choice (1 or 2): '),
-    read_number(2, Input),
+    read_optiontoplay(2, Input),
     (Input = 1 ->
         perform_basic_move(GameState, FromRow, FromCol, BoardSize);
      Input = 2 ->
