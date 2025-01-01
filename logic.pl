@@ -84,6 +84,15 @@ valid_individual_move(FromRow, FromCol, ToRow, ToCol, BoardSize) :-
     adjacent_position_diagonal(FromRow, FromCol, ToRow, ToCol),
     within_bounds(ToRow, ToCol, BoardSize).
 
+valid_moves_from_piece([Board, CurrentPlayer, BoardSize], FromRow, FromCol, Moves) :-
+    findall([FromRow, FromCol, ToRow, ToCol],
+            (adjacent_position_diagonal(FromRow, FromCol, ToRow, ToCol),
+            within_bounds(ToRow, ToCol, BoardSize)),
+            Moves).
+
+
+
+
 
 
 within_bounds(Row, Col, BoardSize) :-
