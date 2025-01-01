@@ -1,3 +1,14 @@
+read_optiontoplay(Number, Result) :-
+    repeat,
+    get_code(ASCIICode),
+    char_code(Char, ASCIICode),
+    number_char(Char, Result),
+    Result >= 0,
+    Result =< Number,
+    skip_line, % Consume the rest of the line
+    !.
+
+
 % Predicate to read a valid row (1-8 or 1-10 depending on the board size)
 read_row(RowIndex, BoardSize) :-
     repeat,
@@ -46,6 +57,28 @@ read_position(RowIndex, ColumnIndex, BoardSize) :-
     read_row(RowIndex, BoardSize),
     read_column(ColumnIndex, BoardSize),
     format('| Selected Position: Row ~d, Column ~d', [RowIndex, ColumnIndex]), nl.
+
+
+
+
+get_player_action(GameState, FromRow, FromCol, BoardSize) :-
+    write('| Choose an action: '), nl,
+    write('| 1 - Basic Move'), nl,
+    write('| 2 - Merge'), nl,
+    write('| Enter your choice (1 or 2): '),
+    read_optiontoplay(2, Input),
+    (Input = 1 ->
+        perform_basic_move(GameState, FromRow, FromCol, BoardSize);
+     Input = 2 ->
+        perform_basic_move(GameState, FromRow, FromCol, BoardSize);
+     write('Invalid choice. Try again.'), nl, fail).
+
+% Placeholder for performing a basic move
+perform_basic_move(GameState, FromRow, FromCol, BoardSize) :-
+    write('| Performing a basic move...'), nl,
+    % TODO: Implement the logic for basic moves
+    write('| Basic move logic to be implemented here.'), nl.
+
 
 %play PvP
 get_player_move(GameState, NewGameState) :-
