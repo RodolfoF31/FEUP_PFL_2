@@ -51,12 +51,25 @@ read_position(RowIndex, ColumnIndex, BoardSize) :-
 get_player_move(GameState, NewGameState) :-
     GameState = [Board, CurrentPlayer, BoardSize],
     player_char(CurrentPlayer, Char),
+
+    %call valid_moves
+    %ask what piece ?
+    %FILTER PIECE FORM MOVES LIST "[2,2,1,1],[2,2,1,3],[2,2,3,1],[2,2,3,3]"
+
+    %validate piece
+    %DISPLAY VALID MOVES
+    %SELECT MOVE
+
     format('Player ~w, select the piece to move:~n', [Char]),
     repeat,
-    read_position(FromRow, FromCol, BoardSize),
-    get_piece(Board, FromRow, FromCol, Piece, CurrentPlayer),
-    write('--- Piece Selected ---'), nl,
+    %read_position(FromRow, FromCol, BoardSize),
+    %get_piece(Board, FromRow, FromCol, Piece, CurrentPlayer),
+    %write('--- Piece Selected ---'), nl,
     write('------------------------------------------------------------'), nl,
+    valid_moves(GameState, Moves),
+    display_moves(Moves),
+    read_position(FromRow, FromCol, BoardSize),
+
     NextPlayer is -CurrentPlayer,
     NewGameState = [Board, NextPlayer, BoardSize].
     %piece_belongs_to_player(Piece, CurrentPlayer), !.
@@ -66,26 +79,15 @@ get_player_move(GameState, NewGameState) :-
     %move_piece(Board, FromRow, FromCol, ToRow, ToCol, NewBoard),
     %NewGameState = [NewBoard, CurrentPlayer, BoardSize].
 
-% Helper predicate to get the piece at a specific position on the board
-get_piece(Board, Row, Col, Piece,CurrentPlayer) :-
-   
-    nth1(Row, Board, BoardRow),
-    nth1(Col, BoardRow, Piece),
-    write('| Piece: '), write(Piece), nl,
-    (Piece = [] -> 
-        (write('Invalid move: No piece at the selected position.'), nl, fail); 
-        (Piece = [CurrentPlayer] -> 
-            (write('Valid move: The piece belongs to you.'), nl, true); 
-            (write('Invalid move: The piece does not belong to you.'), nl, fail))).
 
-% Helper predicate to check if a piece belongs to the current player
-piece_belongs_to_player(Piece, Player) :-
-    % Define the logic to check if the piece belongs to the player
-    % This is a placeholder and should be replaced with actual game logic
-    Piece = Player.
 
-% Helper predicate to move a piece on the board
-move_piece(Board, FromRow, FromCol, ToRow, ToCol, NewBoard) :-
-    % Define the logic to move the piece on the board
-    % This is a placeholder and should be replaced with actual game logic
-    NewBoard = Board.
+display_moves(Moves) :-
+    write('--- Valid Moves ---'), nl,
+    display_moves(Moves, 1).
+
+display_moves([], _).
+display_moves([[FromRow, FromCol, ToRow, ToCol] | Rest], Index) :-
+    format('~d: Move from (~d, ~d) to (~d, ~d)~n', [Index, FromRow, FromCol, ToRow, ToCol]),
+    NextIndex is Index + 1,
+    display_moves(Rest, NextIndex).
+
