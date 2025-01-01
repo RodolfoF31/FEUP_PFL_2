@@ -55,6 +55,15 @@ valid_moves([Board, CurrentPlayer, BoardSize], Moves) :-
             Moves),
     write('Generated Moves: '), write(Moves), nl.
 
+valid_moves_from_piece([Board, CurrentPlayer, BoardSize], FromRow, FromCol, Moves) :-
+    findall([FromRow, FromCol, ToRow, ToCol],
+            (adjacent_position_diagonal(FromRow, FromCol, ToRow, ToCol),
+            within_bounds(ToRow, ToCol, BoardSize)),
+            Moves).
+
+
+
+
 
 
 within_bounds(Row, Col, BoardSize) :-

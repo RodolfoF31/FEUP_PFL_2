@@ -56,7 +56,8 @@ read_position(RowIndex, ColumnIndex, BoardSize) :-
     write('--- Input Position ---'), nl,
     read_row(RowIndex, BoardSize),
     read_column(ColumnIndex, BoardSize),
-    format('| Selected Position: Row ~d, Column ~d', [RowIndex, ColumnIndex]), nl.
+    column_letter(ColumnIndex, ColLetter),
+    format('| Selected Position: Row ~d, Column ~w', [RowIndex, ColLetter]), nl.
 
 
 
@@ -85,23 +86,24 @@ get_player_move(GameState, NewGameState) :-
     GameState = [Board, CurrentPlayer, BoardSize],
     player_char(CurrentPlayer, Char),
 
-    %call valid_moves
-    %ask what piece ?
-    %FILTER PIECE FORM MOVES LIST "[2,2,1,1],[2,2,1,3],[2,2,3,1],[2,2,3,3]"
+    %valid_moves(GameState, Moves),
 
+    %ask what piece ?
     %validate piece
+    %FILTER PIECE FROM MOVES LIST "[2,2,1,1],[2,2,1,3],[2,2,3,1],[2,2,3,3]"
     %DISPLAY VALID MOVES
     %SELECT MOVE
 
     format('Player ~w, select the piece to move:~n', [Char]),
     repeat,
-    %read_position(FromRow, FromCol, BoardSize),
+    read_position(FromRow, FromCol, BoardSize),
+    valid_moves_from_piece(GameState, FromRow, FromCol, Moves), 
+    display_moves(Moves),
     %get_piece(Board, FromRow, FromCol, Piece, CurrentPlayer),
     %write('--- Piece Selected ---'), nl,
     write('------------------------------------------------------------'), nl,
-    valid_moves(GameState, Moves),
-    display_moves(Moves),
-    read_position(FromRow, FromCol, BoardSize),
+    %valid_moves(GameState, Moves),
+    
 
     NextPlayer is -CurrentPlayer,
     NewGameState = [Board, NextPlayer, BoardSize].
@@ -120,7 +122,14 @@ display_moves(Moves) :-
 
 display_moves([], _).
 display_moves([[FromRow, FromCol, ToRow, ToCol] | Rest], Index) :-
-    format('~d: Move from (~d, ~d) to (~d, ~d)~n', [Index, FromRow, FromCol, ToRow, ToCol]),
+    column_letter(FromCol, FromColLetter),
+    column_letter(ToCol, ToColLetter),
+    format('~d: Move from (~d, ~w) to (~d, ~w)~n', [Index, FromRow, FromColLetter, ToRow, ToColLetter]),
     NextIndex is Index + 1,
     display_moves(Rest, NextIndex).
+
+column_letter(ColIndex, ColLetter) :-
+    char_code('A', ACode),
+    ColCode is ACode + ColIndex - 1,
+    char_code(ColLetter, ColCode).
 
