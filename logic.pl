@@ -50,10 +50,39 @@ valid_moves([Board, CurrentPlayer, BoardSize], Moves) :-
     findall([Row, Col], player_piece(Board, CurrentPlayer, Row, Col), Positions),
     findall([FromRow, FromCol, ToRow, ToCol],
             (member([FromRow, FromCol], Positions),
-            adjacent_position_diagonal(FromRow, FromCol, ToRow, ToCol),
-            within_bounds(ToRow, ToCol, BoardSize)),
+            valid_individual_move(FromRow, FromCol, ToRow, ToCol, BoardSize)),
             Moves),
-    write('Generated Moves: '), write(Moves), nl.
+    group_moves_by_from_position(Moves, MovesDict,UniqueFromPositions),
+    filter_stack_moves(Board, UniqueFromPositions, MovesDict, ValidMoves),
+    write('Generated Moves: '), write(UniqueFromPositions), nl.
+
+filter_stack_moves().
+
+    
+
+is_not_empty(Board, [ToRow, ToCol]) :-
+    nth1(ToRow, Board, BoardRow),
+    nth1(ToCol, BoardRow, Stack),
+    Stack \= [],
+    format('Position (~d, ~d) is not empty: ~w~n', [ToRow, ToCol, Stack]).
+
+
+group_moves_by_from_position(Moves, MovesDict,UniqueFromPositions) :-
+    findall([FromRow, FromCol], member([FromRow, FromCol, _, _], Moves), FromPositions),
+    sort(FromPositions, UniqueFromPositions),
+    write('Unique From Positions: '), write(UniqueFromPositions), nl,
+    findall(FromPos-ToPositions,
+            (member([FromRow, FromCol], UniqueFromPositions),
+             findall([ToRow, ToCol],
+                     member([FromRow, FromCol, ToRow, ToCol], Moves),
+                     ToPositions),
+             FromPos = [FromRow, FromCol],
+             write('From Position: '), write(FromPos), write(' To Positions: '), write(ToPositions), nl),
+            MovesDict).
+
+valid_individual_move(FromRow, FromCol, ToRow, ToCol, BoardSize) :-
+    adjacent_position_diagonal(FromRow, FromCol, ToRow, ToCol),
+    within_bounds(ToRow, ToCol, BoardSize).
 
 
 

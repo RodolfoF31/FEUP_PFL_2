@@ -100,7 +100,7 @@ get_player_move(GameState, NewGameState) :-
     %write('--- Piece Selected ---'), nl,
     write('------------------------------------------------------------'), nl,
     valid_moves(GameState, Moves),
-    display_moves(Moves),
+    %display_moves(Moves),
     read_position(FromRow, FromCol, BoardSize),
 
     NextPlayer is -CurrentPlayer,
