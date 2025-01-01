@@ -1,3 +1,4 @@
+:- use_module(library(lists)).
 % game_over(+GameState, -Winner)
 % Determines if the game is over and declares the winner based on majority 8-piece stacks.
 game_over(GameState, Winner) :-
@@ -90,14 +91,52 @@ valid_moves_from_piece([Board, CurrentPlayer, BoardSize], FromRow, FromCol, Move
             within_bounds(ToRow, ToCol, BoardSize)),
             Moves).
 
+% bottom_piece_belongs_to_player(+Board, +Row, +Col, +CurrentPlayer)
+% Checks if the bottom piece of the stack at (Row, Col) belongs to the CurrentPlayer
+bottom_piece_belongs_to_player(Board, Row, Col, CurrentPlayer) :-
+    nth1(Row, Board, BoardRow),
+    nth1(Col, BoardRow, Stack),
+    Stack \= [], % Ensure the stack is not empty
+    nth1(1, Stack, BottomPiece), % Get the bottom piece (first element in the stack)
+    BottomPiece == CurrentPlayer.
 
 
+is_stack_isolated(Board, BoardSize, Row, Col) :-
+    
+    % Check top-left diagonal
+    (Row1 is Row - 1, Col1 is Col - 1,
+     (within_bounds(Row1, Col1, BoardSize) ->
+        nth1(Row1, Board, BoardRow1),
+        nth1(Col1, BoardRow1, Stack1),
+        Stack1 == []
+     ; true)),
+    % Check top-right diagonal
+    (Row2 is Row - 1, Col2 is Col + 1,
+     (within_bounds(Row2, Col2, BoardSize) ->
+        nth1(Row2, Board, BoardRow2),
+        nth1(Col2, BoardRow2, Stack2),
+        Stack2 == []
+     ; true)),
+    % Check bottom-left diagonal
+    (Row3 is Row + 1, Col3 is Col - 1,
+     (within_bounds(Row3, Col3, BoardSize) ->
+        nth1(Row3, Board, BoardRow3),
+        nth1(Col3, BoardRow3, Stack3),
+        Stack3 == []
+     ; true)),
+    % Check bottom-right diagonal
+    (Row4 is Row + 1, Col4 is Col + 1,
+     (within_bounds(Row4, Col4, BoardSize) ->
+        nth1(Row4, Board, BoardRow4),
+        nth1(Col4, BoardRow4, Stack4),
+        Stack4 == []
+     ; true)).
 
-
-
+% Helper predicate to check if coordinates are within bounds
 within_bounds(Row, Col, BoardSize) :-
     Row >= 1, Row =< BoardSize,
     Col >= 1, Col =< BoardSize.
+
 
 adjacent_position_diagonal(FromRow, FromCol, ToRow, ToCol) :-
     (ToRow is FromRow - 1, ToCol is FromCol - 1); % Top-left

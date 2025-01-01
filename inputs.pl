@@ -33,23 +33,15 @@ valid_row(Char, Index) :-
 % Predicate to read a valid column (A-H or A-J depending on the board size)
 read_column(ColumnIndex, BoardSize) :-
     repeat,
-    (BoardSize == 8 -> MaxCol = 'H'; MaxCol = 'J'),
-    format('| Enter a Column (A-~w): ', [MaxCol]),
+    format('| Enter a Column (1-~d): ', [BoardSize]),
     get_code(ASCIICode),
     peek_char(Enter),
     Enter == '\n',
     char_code(Char, ASCIICode),
-    valid_column(Char, ColumnIndex, BoardSize),   % Check if the column is valid and get its index
+    number_char(Char, ColumnIndex),  % Convert to number
+    ColumnIndex >= 1,
+    ColumnIndex =< BoardSize,   % Ensure the column is within the board size
     skip_line, !.
-
-% Map valid column characters (A-H or A-J) to their corresponding indices
-valid_column(Char, Index, BoardSize) :-
-    char_code('A', ACode),
-    char_code(Char, Code),
-    Code >= ACode,
-    (BoardSize == 8 -> MaxCode is ACode + 7; MaxCode is ACode + 9),  % 'A' to 'H' or 'A' to 'J'
-    Code =< MaxCode,
-    Index is Code - ACode + 1.  % Convert to index (1-8 or 1-10)
 
 % Predicate to read a valid position on the board (Row, Column)
 read_position(RowIndex, ColumnIndex, BoardSize) :-
@@ -62,17 +54,29 @@ read_position(RowIndex, ColumnIndex, BoardSize) :-
 
 
 
-get_player_action(GameState, FromRow, FromCol, BoardSize) :-
-    write('| Choose an action: '), nl,
-    write('| 1 - Basic Move'), nl,
-    write('| 2 - Merge'), nl,
-    write('| Enter your choice (1 or 2): '),
-    read_optiontoplay(2, Input),
-    (Input = 1 ->
-        perform_basic_move(GameState, FromRow, FromCol, BoardSize);
-     Input = 2 ->
-        perform_basic_move(GameState, FromRow, FromCol, BoardSize);
-     write('Invalid choice. Try again.'), nl, fail).
+get_player_action([BoardSize, Board], FromRow, FromCol) :-
+    repeat,
+        write(BoardSize), nl,
+        write(Board), nl,
+        write(FromRow), nl,
+        write(FromCol), nl,
+     (\+ is_stack_isolated(Board, BoardSize, FromRow, FromCol) ->
+        (write('The stack is not isolated. You must perform a merge.'), nl,
+         !); % Exit after performing the move
+     write('| Choose an action: '), nl,
+     write('| 1 - Basic Move'), nl,
+     write('| 2 - Merge'), nl,
+     write('| Enter your choice (1 or 2): '),
+     read_optiontoplay(2, Input),
+     (Input = 1 ->
+         perform_basic_move(GameState, FromRow, FromCol, BoardSize),
+         !; % Exit after performing the move
+      Input = 2 ->
+         perform_merge(GameState, FromRow, FromCol, BoardSize),
+         !; % Exit after performing the merge
+      write('Invalid choice. Try again.'), nl, fail)
+    ).
+
 
 % Placeholder for performing a basic move
 perform_basic_move(GameState, FromRow, FromCol, BoardSize) :-
@@ -99,6 +103,8 @@ get_player_move(GameState, NewGameState) :-
     read_position(FromRow, FromCol, BoardSize),
     valid_moves_from_piece(GameState, FromRow, FromCol, Moves), 
     display_moves(Moves),
+    get_player_action([BoardSize, Board], FromRow, FromCol),
+    read_position(FromRow, FromCol, BoardSize),
     %get_piece(Board, FromRow, FromCol, Piece, CurrentPlayer),
     %write('--- Piece Selected ---'), nl,
     write('------------------------------------------------------------'), nl,
@@ -133,3 +139,7 @@ column_letter(ColIndex, ColLetter) :-
     ColCode is ACode + ColIndex - 1,
     char_code(ColLetter, ColCode).
 
+letter_column(ColLetter, ColIndex) :-
+    char_code('A', ACode),
+    char_code(ColLetter, ColCode),
+    ColIndex is ColCode - ACode + 1.
