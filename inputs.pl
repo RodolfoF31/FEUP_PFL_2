@@ -98,17 +98,18 @@ get_player_move(GameState, NewGameState) :-
     %DISPLAY VALID MOVES
     %SELECT MOVE
 
+    valid_moves(GameState, Moves),
+
     format('Player ~w, select the piece to move:~n', [Char]),
     repeat,
     read_position(FromRow, FromCol, BoardSize),
-    valid_moves_from_piece(GameState, FromRow, FromCol, Moves), 
-    display_moves(Moves),
-    get_player_action([BoardSize, Board], FromRow, FromCol),
+    %piece_specific_moves(GameState, FromRow, FromCol, Moves), 
+    %display_moves(Moves),
+    %get_player_action([BoardSize, Board], FromRow, FromCol),
     read_position(FromRow, FromCol, BoardSize),
     %get_piece(Board, FromRow, FromCol, Piece, CurrentPlayer),
     %write('--- Piece Selected ---'), nl,
-    write('------------------------------------------------------------'), nl,
-    %valid_moves(GameState, Moves),
+    write('------------------------------------------------------------'), nl.
     
 
     NextPlayer is -CurrentPlayer,

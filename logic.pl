@@ -49,47 +49,54 @@ player_piece(Board, Player, Row, Col) :-
 % valid_moves(+GameState, -Moves)
 valid_moves([Board, CurrentPlayer, BoardSize], Moves) :-
     findall([Row, Col], player_piece(Board, CurrentPlayer, Row, Col), Positions),
-    findall([FromRow, FromCol, ToRow, ToCol],
-            (member([FromRow, FromCol], Positions),
-            valid_individual_move(FromRow, FromCol, ToRow, ToCol, BoardSize)),
-            Moves),
-    group_moves_by_from_position(Moves, MovesDict,UniqueFromPositions),
-    filter_stack_moves(Board, UniqueFromPositions, MovesDict, ValidMoves),
-    write('Generated Moves: '), write(UniqueFromPositions), nl.
+    %divide postions into isolated and non isolated
+    findall([Row, Col], (member([Row, Col], Positions), is_stack_isolated(Board, BoardSize, Row, Col)), IsolatedPositions),
+    findall([Row, Col], (member([Row, Col], Positions), \+ is_stack_isolated(Board, BoardSize, Row, Col)), NonIsolatedPositions),
 
-filter_stack_moves().
+    write('Isolated Positions: '), write(IsolatedPositions), nl,
+    write('Non Isolated Positions: '), write(NonIsolatedPositions), nl,
+    %return the isolated
+    %return the non isolated
+    %find the correct moves for isolated
+    findall([FromRow, FromCol, ToRow, ToCol],
+            (member([FromRow, FromCol], IsolatedPositions),
+             isolated_moves(FromRow, FromCol, ToRow, ToCol, BoardSize)),
+            IsolatedMoves),
+    findall([FromRow, FromCol, ToRow, ToCol],
+            (member([FromRow, FromCol], NonIsolatedPositions),
+             non_isolated_moves(FromRow, FromCol, ToRow, ToCol, [Board, CurrentPlayer, BoardSize])),
+            NonIsolatedMoves),
+    write('Generated Non-Isolated Moves: '), write(NonIsolatedMoves), nl,
+    write('Generated Isolated Moves: '), write(IsolatedMoves), nl.
+
+
+non_isolated_moves(FromRow, FromCol, ToRow, ToCol, [Board, CurrentPlayer, BoardSize]):-
+    %check is not empty
+    adjacent_position_diagonal(FromRow, FromCol, ToRow, ToCol),
+    within_bounds(ToRow, ToCol, BoardSize),
+    is_not_empty(Board, [ToRow, ToCol]).
+
+isolated_moves(FromRow, FromCol, ToRow, ToCol, BoardSize) :-
+    adjacent_position_diagonal(FromRow, FromCol, ToRow, ToCol),
+    within_bounds(ToRow, ToCol, BoardSize).
+
+
+
+
+piece_specific_moves(Moves, ListSpecificMoves, FromRow, FromCol) :-
+    findall([FromRow, FromCol, ToRow, ToCol],
+            (member([FromRow, FromCol, ToRow, ToCol], Moves),
+             FromRow == FromRow, FromCol == FromCol),
+            ListSpecificMoves).
 
     
 
 is_not_empty(Board, [ToRow, ToCol]) :-
     nth1(ToRow, Board, BoardRow),
     nth1(ToCol, BoardRow, Stack),
-    Stack \= [],
-    format('Position (~d, ~d) is not empty: ~w~n', [ToRow, ToCol, Stack]).
+    Stack \= [].
 
 
-group_moves_by_from_position(Moves, MovesDict,UniqueFromPositions) :-
-    findall([FromRow, FromCol], member([FromRow, FromCol, _, _], Moves), FromPositions),
-    sort(FromPositions, UniqueFromPositions),
-    write('Unique From Positions: '), write(UniqueFromPositions), nl,
-    findall(FromPos-ToPositions,
-            (member([FromRow, FromCol], UniqueFromPositions),
-             findall([ToRow, ToCol],
-                     member([FromRow, FromCol, ToRow, ToCol], Moves),
-                     ToPositions),
-             FromPos = [FromRow, FromCol],
-             write('From Position: '), write(FromPos), write(' To Positions: '), write(ToPositions), nl),
-            MovesDict).
-
-valid_individual_move(FromRow, FromCol, ToRow, ToCol, BoardSize) :-
-    adjacent_position_diagonal(FromRow, FromCol, ToRow, ToCol),
-    within_bounds(ToRow, ToCol, BoardSize).
-
-valid_moves_from_piece([Board, CurrentPlayer, BoardSize], FromRow, FromCol, Moves) :-
-    findall([FromRow, FromCol, ToRow, ToCol],
-            (adjacent_position_diagonal(FromRow, FromCol, ToRow, ToCol),
-            within_bounds(ToRow, ToCol, BoardSize)),
-            Moves).
 
 % bottom_piece_belongs_to_player(+Board, +Row, +Col, +CurrentPlayer)
 % Checks if the bottom piece of the stack at (Row, Col) belongs to the CurrentPlayer
