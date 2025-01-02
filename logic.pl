@@ -49,9 +49,10 @@ player_piece(Board, Player, Row, Col) :-
 % valid_moves(+GameState, -Moves)
 valid_moves([Board, CurrentPlayer, BoardSize], Moves) :-
     findall([Row, Col], player_piece(Board, CurrentPlayer, Row, Col), Positions),
+    findall([Row, Col], (nth1(Row, Board, BoardRow), nth1(Col, BoardRow, Piece), Piece \= []), AllPieces),
     %divide postions into isolated and non isolated
     findall([Row, Col], (member([Row, Col], Positions), is_stack_isolated(Board, BoardSize, Row, Col)), IsolatedPositions),
-    findall([Row, Col], (member([Row, Col], Positions), \+ is_stack_isolated(Board, BoardSize, Row, Col)), NonIsolatedPositions),
+    findall([Row, Col], (member([Row, Col], AllPieces), \+ is_stack_isolated(Board, BoardSize, Row, Col)), NonIsolatedPositions),
 
     write('Isolated Positions: '), write(IsolatedPositions), nl,
     write('Non Isolated Positions: '), write(NonIsolatedPositions), nl,
@@ -62,25 +63,47 @@ valid_moves([Board, CurrentPlayer, BoardSize], Moves) :-
             (member([FromRow, FromCol], IsolatedPositions),
              isolated_moves(FromRow, FromCol, ToRow, ToCol, BoardSize)),
             IsolatedMoves),
-    findall([FromRow, FromCol, ToRow, ToCol],
+    findall([FromRow, FromCol, ToRow, ToCol,StackPosition],
             (member([FromRow, FromCol], NonIsolatedPositions),
-             non_isolated_moves(FromRow, FromCol, ToRow, ToCol, [Board, CurrentPlayer, BoardSize])),
+             non_isolated_moves(FromRow, FromCol, ToRow, ToCol,StackPosition, [Board, CurrentPlayer, BoardSize])),
             NonIsolatedMoves),
     write('Generated Non-Isolated Moves: '), write(NonIsolatedMoves), nl,
     write('Generated Isolated Moves: '), write(IsolatedMoves), nl.
 
 
-non_isolated_moves(FromRow, FromCol, ToRow, ToCol, [Board, CurrentPlayer, BoardSize]):-
+non_isolated_moves(FromRow, FromCol, ToRow, ToCol, StackPosition, [Board, CurrentPlayer, BoardSize]):-
     %check is not empty
     adjacent_position_diagonal(FromRow, FromCol, ToRow, ToCol),
     within_bounds(ToRow, ToCol, BoardSize),
-    is_not_empty(Board, [ToRow, ToCol]).
+    is_not_empty(Board, [ToRow, ToCol]),
+    get_stack_pieces(Board, FromRow, FromCol, StackPieces),
+    valid_merge(Board, StackPieces, [FromRow,FromCol,ToRow, ToCol], StackPosition, CurrentPlayer),
+    StackPosition \= [].
+
+
+
+valid_merge(Board,StackPieces, [FromRow, FromCol, ToRow, ToCol], StackPosition, CurrentPlayer) :-
+    get_stack_pieces(Board, ToRow, ToCol, ToStack),
+    length(ToStack, ToStackLength),
+    % Generate all possible merges
+    findall(Index,
+            (nth1(Index, StackPieces, Piece),
+             Piece == CurrentPlayer,
+             length(StackPieces, StackPiecesLength),
+             TotalLength is ToStackLength + StackPiecesLength,
+             TotalLength =< 8,
+             Index =< ToStackLength),
+            StackPosition).    
 
 isolated_moves(FromRow, FromCol, ToRow, ToCol, BoardSize) :-
     adjacent_position_diagonal(FromRow, FromCol, ToRow, ToCol),
     within_bounds(ToRow, ToCol, BoardSize).
 
-
+get_stack_pieces(Board, Row, Col, StackPieces) :-
+    nth1(Row, Board, BoardRow),
+    nth1(Col, BoardRow, Stack),
+    Stack \= [],
+    StackPieces = Stack.
 
 
 piece_specific_moves(Moves, ListSpecificMoves, FromRow, FromCol) :-
