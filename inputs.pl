@@ -22,6 +22,8 @@ read_row(RowIndex, BoardSize) :-
     RowIndex =< BoardSize,   % Ensure the row is within the board size
     skip_line, !.
 
+
+
 % Map valid row characters (A-H) to their corresponding indices
 valid_row(Char, Index) :-
     char_code('A', ACode),
@@ -53,29 +55,25 @@ read_position(RowIndex, ColumnIndex, BoardSize) :-
 
 
 
-
-get_player_action([BoardSize, Board], FromRow, FromCol) :-
-    repeat,
-        write(BoardSize), nl,
-        write(Board), nl,
-        write(FromRow), nl,
-        write(FromCol), nl,
-     (\+ is_stack_isolated(Board, BoardSize, FromRow, FromCol) ->
-        (write('The stack is not isolated. You must perform a merge.'), nl,
-         !); % Exit after performing the move
-     write('| Choose an action: '), nl,
-     write('| 1 - Basic Move'), nl,
-     write('| 2 - Merge'), nl,
-     write('| Enter your choice (1 or 2): '),
-     read_optiontoplay(2, Input),
-     (Input = 1 ->
-         perform_basic_move(GameState, FromRow, FromCol, BoardSize),
-         !; % Exit after performing the move
-      Input = 2 ->
-         perform_merge(GameState, FromRow, FromCol, BoardSize),
-         !; % Exit after performing the merge
-      write('Invalid choice. Try again.'), nl, fail)
+get_player_action([Board, CurrentPlayer, BoardSize], FromRow, FromCol) :-
+    ( \+ is_stack_isolated(Board, BoardSize, FromRow, FromCol) -> 
+        write('The stack is not isolated. You must perform a merge.'), nl,
+        write('Input to what stack you would like to merge and the index of the piece to split the stack'), nl,
+        read_position(ToRow, ToCol, BoardSize),
+        write('| Enter an Index: '),
+        read(Index),  % Read the index as a number
+        perform_merge(Board, FromRow, FromCol, ToRow, ToCol, Index, NewBoard),
+        ! ;
+        (write('The stack is isolated. You must perform a basic move.'), nl,
+        write('Input to where you would like to move the stack'), nl,
+        read_position(ToRow, ToCol, BoardSize),
+        adjacent_position_diagonal(FromRow, FromCol, ToRow, ToCol),
+        within_bounds(ToRow, ToCol, BoardSize),
+        perform_basic_move([Board, CurrentPlayer, BoardSize], FromRow, FromCol, ToRow, ToCol, BoardSize),
+        !)
     ).
+
+
 
 
 % Placeholder for performing a basic move
@@ -105,7 +103,7 @@ get_player_move(GameState, NewGameState) :-
     read_position(FromRow, FromCol, BoardSize),
     %piece_specific_moves(GameState, FromRow, FromCol, Moves), 
     %display_moves(Moves),
-    %get_player_action([BoardSize, Board], FromRow, FromCol),
+    get_player_action([Board, CurrentPlayer, BoardSize], FromRow, FromCol),
     read_position(FromRow, FromCol, BoardSize),
     %get_piece(Board, FromRow, FromCol, Piece, CurrentPlayer),
     %write('--- Piece Selected ---'), nl,

@@ -80,7 +80,31 @@ non_isolated_moves(FromRow, FromCol, ToRow, ToCol, StackPosition, [Board, Curren
     valid_merge(Board, StackPieces, [FromRow,FromCol,ToRow, ToCol], StackPosition, CurrentPlayer),
     StackPosition \= [].
 
+perform_merge(Board, FromRow, FromCol, ToRow, ToCol, Index, NewBoard) :-
+    % Get the stacks from both positions
+    get_piece_for_merge(Board, FromRow, FromCol, FromStack),
+    get_piece_for_merge(Board, ToRow, ToCol, ToStack),
+    
+    % Split the FromStack at the given index
+    length(Prefix, Index),
+    append(Prefix, Suffix, FromStack),
+    
+    % Merge the Suffix into the ToStack
+    append(ToStack, Suffix, NewToStack),
+    
+    % Update the board with the new stacks
+    set_piece_for_merge(Board, FromRow, FromCol, Prefix, TempBoard),
+    set_piece_for_merge(TempBoard, ToRow, ToCol, NewToStack, NewBoard).
 
+get_piece_for_merge(Board, Row, Col, Piece) :-
+    nth1(Row, Board, BoardRow),
+    nth1(Col, BoardRow, Piece).
+
+set_piece_for_merge(Board, Row, Col, Piece, NewBoard) :-
+    nth1(Row, Board, BoardRow, RestRows),
+    nth1(Col, BoardRow, _, RestCols),
+    nth1(Col, NewBoardRow, Piece, RestCols),
+    nth1(Row, NewBoard, NewBoardRow, RestRows).
 
 valid_merge(Board,StackPieces, [FromRow, FromCol, ToRow, ToCol], StackPosition, CurrentPlayer) :-
     get_stack_pieces(Board, ToRow, ToCol, ToStack),
