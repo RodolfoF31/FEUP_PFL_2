@@ -1,4 +1,9 @@
 :- use_module(library(lists)).
+
+min_list([Min], Min).
+min_list([H|T], Min) :-
+    min_list(T, MinTail),
+    Min is min(H, MinTail).
 % game_over(+GameState, -Winner)
 % Determines if the game is over and declares the winner based on majority 8-piece stacks.
 game_over(GameState, Winner) :-
@@ -54,22 +59,100 @@ valid_moves([Board, CurrentPlayer, BoardSize], Moves) :-
     findall([Row, Col], (member([Row, Col], Positions), is_stack_isolated(Board, BoardSize, Row, Col)), IsolatedPositions),
     findall([Row, Col], (member([Row, Col], AllPieces), \+ is_stack_isolated(Board, BoardSize, Row, Col)), NonIsolatedPositions),
 
-    write('Isolated Positions: '), write(IsolatedPositions), nl,
-    write('Non Isolated Positions: '), write(NonIsolatedPositions), nl,
-    %return the isolated
+    write('All Pieces: '), write(AllPieces), nl,    
     %return the non isolated
-    %find the correct moves for isolated
+    % Find the correct moves for isolated positions and group by origin position
     findall([FromRow, FromCol, ToRow, ToCol],
             (member([FromRow, FromCol], IsolatedPositions),
              isolated_moves(FromRow, FromCol, ToRow, ToCol, BoardSize)),
-            IsolatedMoves),
+            PossibleMoves),
+
+    findall([FromRow,FromCol,Distance,ToRow,ToCol],
+            (member(Move, PossibleMoves),
+            Move = [FromRow, FromCol, ToRow, ToCol],
+             get_smallest_path(Move ,AllPieces, Distance, Results),
+             Results = [[_,_,Distance]|_]),
+            PossibleMovesWithDistance),
+
+    PossibleMovesWithDistance = [FirstMove | _],
+
+    filter_smalles_moves(PossibleMovesWithDistance,FirstMove, TempMovesFromPosition , FilteredMoves),
+
     findall([FromRow, FromCol, ToRow, ToCol,StackPosition],
             (member([FromRow, FromCol], NonIsolatedPositions),
              non_isolated_moves(FromRow, FromCol, ToRow, ToCol,StackPosition, [Board, CurrentPlayer, BoardSize])),
             NonIsolatedMoves),
-    write('Generated Non-Isolated Moves: '), write(NonIsolatedMoves), nl,
-    write('Generated Isolated Moves: '), write(IsolatedMoves), nl.
+    append(NonIsolatedMoves,FilteredMoves, Moves),
+    write('All Moves: '), write(Moves), nl.
 
+% filter_smalles_moves(+PossibleMovesWithDistance, +IterMove, +TempMovesFromPosition, -FilteredMoves)
+filter_smalles_moves([], _, _, FilteredMoves).
+filter_smalles_moves([[FromRow, FromCol, Distance, ToRow, ToCol]], _, TempMovesFromPosition, FilteredMoves):-
+    append(TempMovesFromPosition, [[FromRow, FromCol, ToRow, ToCol,0]], FilteredMoves).
+filter_smalles_moves([[FromRow, FromCol, Distance, ToRow, ToCol] | Rest], IterMove, TempMovesFromPosition, FilteredMoves) :-
+
+    (IterMove = [IterFr, IterFc, IterDist, IterTr, IterTc] ->
+        (FromRow == IterFr, FromCol == IterFc ->
+            (Distance < IterDist ->
+                TempMovesFromPosition1 = [[FromRow, FromCol, ToRow, ToCol,0]],
+                filter_smalles_moves(Rest, [FromRow, FromCol, Distance, ToRow, ToCol], TempMovesFromPosition1, FilteredMoves)
+            ;
+            Distance == IterDist ->
+                append([[FromRow, FromCol, ToRow, ToCol,0]], TempMovesFromPosition, TempMovesFromPosition1),
+                filter_smalles_moves(Rest, IterMove, TempMovesFromPosition1, FilteredMoves)
+            ;
+            Distance > IterDist ->
+                filter_smalles_moves(Rest, IterMove, TempMovesFromPosition, FilteredMoves)
+            )
+        ;
+        append(TempMovesFromPosition, FilteredMoves, FilteredMoves1),
+        filter_smalles_moves(Rest, [FromRow, FromCol, Distance, ToRow, ToCol], [[FromRow, FromCol, Distance, ToRow, ToCol]], FilteredMoves1)
+        )
+    ;
+    filter_smalles_moves(Rest, [FromRow, FromCol, Distance, ToRow, ToCol], [[FromRow, FromCol, ToRow, ToCol,0]], FilteredMoves)
+    ).
+
+isolated_moves(FromRow, FromCol, ToRow, ToCol, BoardSize) :-
+    adjacent_position_diagonal(FromRow, FromCol, ToRow, ToCol),
+    within_bounds(ToRow, ToCol, BoardSize).
+
+
+xor(A, B) :-
+    (A, \+ B) ; (\+ A, B) ; (\+ A, \+ B).
+
+get_smallest_path([Fr, Fc, ToRow, ToCol],AllPieces, Distance , Dest) :-
+    findall([DestRow, DestCol, TempDistance],
+            (member([DestRow, DestCol], AllPieces),
+             xor((Fr == DestRow), (Fc == DestCol)),
+             distance_between(ToRow, ToCol, DestRow, DestCol, TempDistance)),
+            Distances),
+    (Distances = [] ->
+        Dest = [ToRow, ToCol], Distance = 0
+    ;
+        SmallestDistances = [[_,_,1000]],
+        find_min_distance(Distances, SmallestDistances,FinalSmallestDistances),
+        Dest = FinalSmallestDistances
+    ).
+
+find_min_distance([], SmallestDistances, SmallestDistances).
+find_min_distance([[DestRow, DestCol, Distance] | Rest], [CurrSmallestNode | RestSmallest], Result) :-
+    CurrSmallestNode = [_, _, CurrSmallestDistance],
+
+    (Distance < CurrSmallestDistance ->
+        TempSmallestDistances = [[DestRow, DestCol, Distance]],
+        find_min_distance(Rest, TempSmallestDistances, Result)
+    ; Distance == CurrSmallestDistance ->
+        append([[DestRow, DestCol, Distance]], [CurrSmallestNode], TempSmallestDistances),
+        find_min_distance(Rest, TempSmallestDistances, Result)
+    ;
+        find_min_distance(Rest, [CurrSmallestNode | RestSmallest], Result)
+    ).
+    
+distance_between(FromRow, FromCol, ToRow, ToCol, Distance) :-
+    DeltaRow is ToRow - FromRow,
+    DeltaCol is ToCol - FromCol,
+    EuclideanDistance is sqrt(DeltaRow * DeltaRow + DeltaCol * DeltaCol),
+    Distance is floor(EuclideanDistance).
 
 non_isolated_moves(FromRow, FromCol, ToRow, ToCol, StackPosition, [Board, CurrentPlayer, BoardSize]):-
     %check is not empty
@@ -95,22 +178,12 @@ valid_merge(Board,StackPieces, [FromRow, FromCol, ToRow, ToCol], StackPosition, 
              Index =< ToStackLength),
             StackPosition).    
 
-isolated_moves(FromRow, FromCol, ToRow, ToCol, BoardSize) :-
-    adjacent_position_diagonal(FromRow, FromCol, ToRow, ToCol),
-    within_bounds(ToRow, ToCol, BoardSize).
-
 get_stack_pieces(Board, Row, Col, StackPieces) :-
     nth1(Row, Board, BoardRow),
     nth1(Col, BoardRow, Stack),
     Stack \= [],
     StackPieces = Stack.
 
-
-piece_specific_moves(Moves, ListSpecificMoves, FromRow, FromCol) :-
-    findall([FromRow, FromCol, ToRow, ToCol],
-            (member([FromRow, FromCol, ToRow, ToCol], Moves),
-             FromRow == FromRow, FromCol == FromCol),
-            ListSpecificMoves).
 
     
 
@@ -119,16 +192,6 @@ is_not_empty(Board, [ToRow, ToCol]) :-
     nth1(ToCol, BoardRow, Stack),
     Stack \= [].
 
-
-
-% bottom_piece_belongs_to_player(+Board, +Row, +Col, +CurrentPlayer)
-% Checks if the bottom piece of the stack at (Row, Col) belongs to the CurrentPlayer
-bottom_piece_belongs_to_player(Board, Row, Col, CurrentPlayer) :-
-    nth1(Row, Board, BoardRow),
-    nth1(Col, BoardRow, Stack),
-    Stack \= [], % Ensure the stack is not empty
-    nth1(1, Stack, BottomPiece), % Get the bottom piece (first element in the stack)
-    BottomPiece == CurrentPlayer.
 
 
 is_stack_isolated(Board, BoardSize, Row, Col) :-
@@ -175,13 +238,3 @@ adjacent_position_diagonal(FromRow, FromCol, ToRow, ToCol) :-
     (ToRow is FromRow + 1, ToCol is FromCol + 1). % Bottom-right
 
 
-
-between(Low, High, Value) :-
-    Low =< High,
-    between_(Low, High, Value).
-
-between_(Low, High, Low).
-between_(Low, High, Value) :-
-    Low < High,
-    NextLow is Low + 1,
-    between_(NextLow, High, Value).
