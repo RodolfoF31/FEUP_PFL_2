@@ -22,6 +22,19 @@ read_row(RowIndex, BoardSize) :-
     RowIndex =< BoardSize,   % Ensure the row is within the board size
     skip_line, !.
 
+read_index(Index, BoardSize) :-
+    repeat,  
+    write('| Enter an Index: '),
+    get_code(ASCIICode),
+    peek_char(Enter),
+    Enter == '\n',
+    char_code(Char, ASCIICode),  % Convert ASCII code to character
+    number_char(Char, Index),    % Convert the character to a number
+    Index >= 1, Index =< BoardSize,  % Validate the range
+    skip_line, 
+    !.  
+
+
 
 
 % Map valid row characters (A-H) to their corresponding indices
@@ -60,17 +73,15 @@ get_player_action([Board, CurrentPlayer, BoardSize], FromRow, FromCol) :-
         write('The stack is not isolated. You must perform a merge.'), nl,
         write('Input to what stack you would like to merge and the index of the piece to split the stack'), nl,
         read_position(ToRow, ToCol, BoardSize),
-        write('| Enter an Index: '),
-        read(Index),  % Read the index as a number
-        perform_merge(Board, FromRow, FromCol, ToRow, ToCol, Index, NewBoard),
+        read_index(Index, BoardSize),
+        move([Board, CurrentPlayer, BoardSize], [FromRow, FromCol, ToRow, ToCol, Index], NewGameState),
         ! ;
-        (write('The stack is isolated. You must perform a basic move.'), nl,
-        write('Input to where you would like to move the stack'), nl,
+      is_stack_isolated(Board, BoardSize, FromRow, FromCol) ->
+        write('The stack is isolated. You can perform a basic move.'), nl,
+        write('Input the position to move the stack'), nl,
         read_position(ToRow, ToCol, BoardSize),
-        adjacent_position_diagonal(FromRow, FromCol, ToRow, ToCol),
-        within_bounds(ToRow, ToCol, BoardSize),
-        perform_basic_move([Board, CurrentPlayer, BoardSize], FromRow, FromCol, ToRow, ToCol, BoardSize),
-        !)
+        move([Board, CurrentPlayer, BoardSize], [FromRow, FromCol, ToRow, ToCol, 0], NewGameState),
+        ! 
     ).
 
 
@@ -104,7 +115,6 @@ get_player_move(GameState, NewGameState) :-
     %piece_specific_moves(GameState, FromRow, FromCol, Moves), 
     %display_moves(Moves),
     get_player_action([Board, CurrentPlayer, BoardSize], FromRow, FromCol),
-    read_position(FromRow, FromCol, BoardSize),
     %get_piece(Board, FromRow, FromCol, Piece, CurrentPlayer),
     %write('--- Piece Selected ---'), nl,
     write('------------------------------------------------------------'), nl.

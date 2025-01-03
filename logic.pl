@@ -80,31 +80,72 @@ non_isolated_moves(FromRow, FromCol, ToRow, ToCol, StackPosition, [Board, Curren
     valid_merge(Board, StackPieces, [FromRow,FromCol,ToRow, ToCol], StackPosition, CurrentPlayer),
     StackPosition \= [].
 
-perform_merge(Board, FromRow, FromCol, ToRow, ToCol, Index, NewBoard) :-
-    % Get the stacks from both positions
-    get_piece_for_merge(Board, FromRow, FromCol, FromStack),
-    get_piece_for_merge(Board, ToRow, ToCol, ToStack),
-    
-    % Split the FromStack at the given index
-    length(Prefix, Index),
-    append(Prefix, Suffix, FromStack),
-    
-    % Merge the Suffix into the ToStack
-    append(ToStack, Suffix, NewToStack),
-    
-    % Update the board with the new stacks
-    set_piece_for_merge(Board, FromRow, FromCol, Prefix, TempBoard),
-    set_piece_for_merge(TempBoard, ToRow, ToCol, NewToStack, NewBoard).
 
-get_piece_for_merge(Board, Row, Col, Piece) :-
-    nth1(Row, Board, BoardRow),
-    nth1(Col, BoardRow, Piece).
+move([Board, CurrentPlayer, BoardSize], [FromRow, FromCol, ToRow, ToCol, Index], [NewBoard, CurrentPlayer, BoardSize]) :-
+    ( Index =\= 0 ->
+        merge_stacks(Board, FromRow, FromCol, ToRow, ToCol, Index, NewBoard),
+        write('Stack merged successfully!'), nl
+        
+    ; 
+        adjacent_position_diagonal(FromRow, FromCol, ToRow, ToCol),
+        get_stack(Board, FromRow, FromCol, Stack),
+        set_piece_for_basicmove(Board, FromRow, FromCol, [], TempBoard),
+        set_piece_for_basicmove(TempBoard, ToRow, ToCol, Stack, NewBoard),
+        write('Stack moved successfully!'), nl,
+        display_board(NewBoard, BoardSize),
+        sleep(1000000000)
+        
+    ).
 
-set_piece_for_merge(Board, Row, Col, Piece, NewBoard) :-
+set_piece_for_basicmove(Board, Row, Col, Piece, UpdatedBoard) :-
     nth1(Row, Board, BoardRow, RestRows),
     nth1(Col, BoardRow, _, RestCols),
     nth1(Col, NewBoardRow, Piece, RestCols),
-    nth1(Row, NewBoard, NewBoardRow, RestRows).
+    nth1(Row, UpdatedBoard, NewBoardRow, RestRows).
+
+
+get_stack(Board, Row, Col, Stack) :-
+    nth1(Row, Board, BoardRow),
+    nth1(Col, BoardRow, Stack).
+
+set_piece_for_merge(Board, Row, Col, Piece, UpdatedBoard) :-
+    nth1(Row, Board, BoardRow),
+    nth1(Col, BoardRow, Cell),
+    append([], Piece, NewCell), 
+    set_row(BoardRow, Col, NewCell, NewRow),
+    set_row(Board, Row, NewRow, UpdatedBoard).
+
+merge_stacks(Board, FromRow, FromCol, ToRow, ToCol, Index, NewBoard) :-
+    get_stack(Board, FromRow, FromCol, FromStack),
+    get_stack(Board, ToRow, ToCol, ToStack),
+    
+    % Merge stacks at the given index
+    length(Keep, IndexMinusOne),
+    IndexMinusOne is Index - 1,
+    append(Keep, ToMerge, FromStack),
+    
+    % Merge ToMerge from FromStack into ToStack
+    append(ToStack, ToMerge, NewToStack),
+    
+    % Update the FromStack with only the bottom part
+    NewFromStack = Keep,
+    
+    % Update the board with the new stacks
+    set_piece_for_merge(Board, FromRow, FromCol, NewFromStack, TempBoard),
+    set_piece_for_merge(TempBoard, ToRow, ToCol, NewToStack, NewBoard).
+
+
+
+% Helper predicate to update the board with a new stack at a specific position
+update_board(Board, Row, Col, NewStack, NewBoard) :-
+    nth1(Row, Board, BoardRow),
+    nth1(Col, BoardRow, _, RestRow),
+    nth1(Col, NewRow, NewStack, RestRow),
+    nth1(Row, Board, _, RestBoard),
+    nth1(Row, NewBoard, NewRow, RestBoard).
+
+
+
 
 valid_merge(Board,StackPieces, [FromRow, FromCol, ToRow, ToCol], StackPosition, CurrentPlayer) :-
     get_stack_pieces(Board, ToRow, ToCol, ToStack),
