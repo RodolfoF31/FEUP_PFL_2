@@ -55,34 +55,37 @@ player_piece(Board, Player, Row, Col) :-
 valid_moves([Board, CurrentPlayer, BoardSize], Moves) :-
     findall([Row, Col], player_piece(Board, CurrentPlayer, Row, Col), Positions),
     findall([Row, Col], (nth1(Row, Board, BoardRow), nth1(Col, BoardRow, Piece), Piece \= []), AllPieces),
-    %divide postions into isolated and non isolated
+    % divide positions into isolated and non-isolated
     findall([Row, Col], (member([Row, Col], Positions), is_stack_isolated(Board, BoardSize, Row, Col)), IsolatedPositions),
     findall([Row, Col], (member([Row, Col], AllPieces), \+ is_stack_isolated(Board, BoardSize, Row, Col)), NonIsolatedPositions),
 
-    write('All Pieces: '), write(AllPieces), nl,    
-    %return the non isolated
+    % return the non-isolated
     % Find the correct moves for isolated positions and group by origin position
-    findall([FromRow, FromCol, ToRow, ToCol],
-            (member([FromRow, FromCol], IsolatedPositions),
-             isolated_moves(FromRow, FromCol, ToRow, ToCol, BoardSize)),
-            PossibleMoves),
+    (IsolatedPositions \= [] ->
+        findall([FromRow, FromCol, ToRow, ToCol],
+                (member([FromRow, FromCol], IsolatedPositions),
+                 isolated_moves(FromRow, FromCol, ToRow, ToCol, BoardSize)),
+                PossibleMoves),
 
-    findall([FromRow,FromCol,Distance,ToRow,ToCol],
-            (member(Move, PossibleMoves),
-            Move = [FromRow, FromCol, ToRow, ToCol],
-             get_smallest_path(Move ,AllPieces, Distance, Results),
-             Results = [[_,_,Distance]|_]),
-            PossibleMovesWithDistance),
+        findall([FromRow,FromCol,Distance,ToRow,ToCol],
+                (member(Move, PossibleMoves),
+                Move = [FromRow, FromCol, ToRow, ToCol],
+                 get_smallest_path(Move ,AllPieces, Distance, Results),
+                 Results = [[_,_,Distance]|_]),
+                PossibleMovesWithDistance),
 
-    PossibleMovesWithDistance = [FirstMove | _],
+        PossibleMovesWithDistance = [FirstMove | _],
 
-    filter_smalles_moves(PossibleMovesWithDistance,FirstMove, TempMovesFromPosition , FilteredMoves),
+        filter_smalles_moves(PossibleMovesWithDistance, FirstMove, TempMovesFromPosition, FilteredMoves)
+    ;
+        FilteredMoves = []
+    ),
 
-    findall([FromRow, FromCol, ToRow, ToCol,StackPosition],
+    findall([FromRow, FromCol, ToRow, ToCol, StackPosition],
             (member([FromRow, FromCol], NonIsolatedPositions),
-             non_isolated_moves(FromRow, FromCol, ToRow, ToCol,StackPosition, [Board, CurrentPlayer, BoardSize])),
+             non_isolated_moves(FromRow, FromCol, ToRow, ToCol, StackPosition, [Board, CurrentPlayer, BoardSize])),
             NonIsolatedMoves),
-    append(NonIsolatedMoves,FilteredMoves, Moves),
+    append(NonIsolatedMoves, FilteredMoves, Moves),
     write('All Moves: '), write(Moves), nl.
 
 % filter_smalles_moves(+PossibleMovesWithDistance, +IterMove, +TempMovesFromPosition, -FilteredMoves)

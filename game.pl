@@ -20,7 +20,7 @@ game_loop(GameState) :-
     repeat,
         display_game(GameState),
         get_player_move(GameState, NewGameState),
+        write('New Game State: '), write(NewGameState), nl,
         game_loop(NewGameState).
-        %game_over(GameState, Winner),
-    !.
+    
     

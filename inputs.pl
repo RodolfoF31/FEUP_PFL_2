@@ -68,7 +68,7 @@ read_position(RowIndex, ColumnIndex, BoardSize) :-
 
 
 
-get_player_action([Board, CurrentPlayer, BoardSize], FromRow, FromCol) :-
+get_player_action([Board, CurrentPlayer, BoardSize], FromRow, FromCol,NewGameState,Moves) :-
     ( \+ is_stack_isolated(Board, BoardSize, FromRow, FromCol) -> 
         write('The stack is not isolated. You must perform a merge.'), nl,
         write('Input to what stack you would like to merge and the index of the piece to split the stack'), nl,
@@ -96,32 +96,25 @@ perform_basic_move(GameState, FromRow, FromCol, BoardSize) :-
 
 %play PvP
 get_player_move(GameState, NewGameState) :-
+    write('--- Player Move ------------------------------------------------------------------------------------------------'), nl,
     GameState = [Board, CurrentPlayer, BoardSize],
     player_char(CurrentPlayer, Char),
-
-    %valid_moves(GameState, Moves),
-
-    %ask what piece ?
-    %validate piece
-    %FILTER PIECE FROM MOVES LIST "[2,2,1,1],[2,2,1,3],[2,2,3,1],[2,2,3,3]"
-    %DISPLAY VALID MOVES
-    %SELECT MOVE
 
     valid_moves(GameState, Moves),
 
     format('Player ~w, select the piece to move:~n', [Char]),
-    repeat,
     read_position(FromRow, FromCol, BoardSize),
     %piece_specific_moves(GameState, FromRow, FromCol, Moves), 
     %display_moves(Moves),
-    get_player_action([Board, CurrentPlayer, BoardSize], FromRow, FromCol),
+    get_player_action([Board, CurrentPlayer, BoardSize], FromRow, FromCol,TempState,Moves),
     %get_piece(Board, FromRow, FromCol, Piece, CurrentPlayer),
     %write('--- Piece Selected ---'), nl,
+    TempState = [NewBoard, CurrentPlayer, BoardSize],
+    NextPlayer is -CurrentPlayer,
+    NewGameState = [NewBoard, NextPlayer, BoardSize],
     write('------------------------------------------------------------'), nl.
     
 
-    NextPlayer is -CurrentPlayer,
-    NewGameState = [Board, NextPlayer, BoardSize].
     %piece_belongs_to_player(Piece, CurrentPlayer), !.
     %format('Player ~w, enter the position to move the piece:~n', [CurrentPlayer]),
     %read_position(ToRow, ToCol, BoardSize),
