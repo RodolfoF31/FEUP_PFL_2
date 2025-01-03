@@ -22,6 +22,21 @@ read_row(RowIndex, BoardSize) :-
     RowIndex =< BoardSize,   % Ensure the row is within the board size
     skip_line, !.
 
+read_index(Index, BoardSize) :-
+    repeat,  
+    write('| Enter an Index: '),
+    get_code(ASCIICode),
+    peek_char(Enter),
+    Enter == '\n',
+    char_code(Char, ASCIICode),  % Convert ASCII code to character
+    number_char(Char, Index),    % Convert the character to a number
+    Index >= 1, Index =< BoardSize,  % Validate the range
+    skip_line, 
+    !.  
+
+
+
+
 % Map valid row characters (A-H) to their corresponding indices
 valid_row(Char, Index) :-
     char_code('A', ACode),
@@ -53,29 +68,23 @@ read_position(RowIndex, ColumnIndex, BoardSize) :-
 
 
 
-
-get_player_action([BoardSize, Board], FromRow, FromCol) :-
-    repeat,
-        write(BoardSize), nl,
-        write(Board), nl,
-        write(FromRow), nl,
-        write(FromCol), nl,
-     (\+ is_stack_isolated(Board, BoardSize, FromRow, FromCol) ->
-        (write('The stack is not isolated. You must perform a merge.'), nl,
-         !); % Exit after performing the move
-     write('| Choose an action: '), nl,
-     write('| 1 - Basic Move'), nl,
-     write('| 2 - Merge'), nl,
-     write('| Enter your choice (1 or 2): '),
-     read_optiontoplay(2, Input),
-     (Input = 1 ->
-         perform_basic_move(GameState, FromRow, FromCol, BoardSize),
-         !; % Exit after performing the move
-      Input = 2 ->
-         perform_merge(GameState, FromRow, FromCol, BoardSize),
-         !; % Exit after performing the merge
-      write('Invalid choice. Try again.'), nl, fail)
+get_player_action([Board, CurrentPlayer, BoardSize], FromRow, FromCol) :-
+    ( \+ is_stack_isolated(Board, BoardSize, FromRow, FromCol) -> 
+        write('The stack is not isolated. You must perform a merge.'), nl,
+        write('Input to what stack you would like to merge and the index of the piece to split the stack'), nl,
+        read_position(ToRow, ToCol, BoardSize),
+        read_index(Index, BoardSize),
+        move([Board, CurrentPlayer, BoardSize], [FromRow, FromCol, ToRow, ToCol, Index], NewGameState),
+        ! ;
+      is_stack_isolated(Board, BoardSize, FromRow, FromCol) ->
+        write('The stack is isolated. You can perform a basic move.'), nl,
+        write('Input the position to move the stack'), nl,
+        read_position(ToRow, ToCol, BoardSize),
+        move([Board, CurrentPlayer, BoardSize], [FromRow, FromCol, ToRow, ToCol, 0], NewGameState),
+        ! 
     ).
+
+
 
 
 % Placeholder for performing a basic move
@@ -105,8 +114,7 @@ get_player_move(GameState, NewGameState) :-
     read_position(FromRow, FromCol, BoardSize),
     %piece_specific_moves(GameState, FromRow, FromCol, Moves), 
     %display_moves(Moves),
-    %get_player_action([BoardSize, Board], FromRow, FromCol),
-    read_position(FromRow, FromCol, BoardSize),
+    get_player_action([Board, CurrentPlayer, BoardSize], FromRow, FromCol),
     %get_piece(Board, FromRow, FromCol, Piece, CurrentPlayer),
     %write('--- Piece Selected ---'), nl,
     write('------------------------------------------------------------'), nl.
