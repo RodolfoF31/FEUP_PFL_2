@@ -80,7 +80,8 @@ is_valid_move(Moves, FromRow, FromCol, ToRow, ToCol, Index) :-
 has_valid_move(Moves, FromRow, FromCol) :-
     member([FromRow, FromCol, _, _, _], Moves).
 
-get_player_action([Board, CurrentPlayer, BoardSize], FromRow, FromCol, NewGameState, Moves) :-
+get_player_action([Board, CurrentPlayer, BoardSize,_,_,_,_], FromRow, FromCol, NewGameState, Moves) :-
+    write('--- Player Action ------------------------------------------------------------------------------------------------'), nl,
     ( \+ is_stack_isolated(Board, BoardSize, FromRow, FromCol) -> 
         write('The stack is not isolated. You must perform a merge.'), nl,
         write('Input to what stack you would like to merge and the index of the piece to split the stack'), nl,
