@@ -177,9 +177,7 @@ move([Board, CurrentPlayer, BoardSize], [FromRow, FromCol, ToRow, ToCol, Index],
         get_stack(Board, FromRow, FromCol, Stack),
         set_piece_for_basicmove(Board, FromRow, FromCol, [], TempBoard),
         set_piece_for_basicmove(TempBoard, ToRow, ToCol, Stack, NewBoard),
-        write('Stack moved successfully!'), nl,
-        display_board(NewBoard, BoardSize),
-        sleep(1000000000)
+        write('Stack moved successfully!'), nl
         
     ).
 
