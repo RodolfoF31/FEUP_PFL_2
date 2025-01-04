@@ -58,6 +58,14 @@ read_column(ColumnIndex, BoardSize) :-
     ColumnIndex =< BoardSize,   % Ensure the column is within the board size
     skip_line, !.
 
+stack_belongs_to_player(Board, Row, Col, CurrentPlayer) :-
+    nth1(Row, Board, BoardRow),
+    nth1(Col, BoardRow, Stack),
+    Stack \= [],
+    last(Stack, BottomPiece),
+    BottomPiece = CurrentPlayer.
+
+
 % Predicate to read a valid position on the board (Row, Column)
 read_position(RowIndex, ColumnIndex, BoardSize) :-
     write('--- Input Position ---'), nl,
@@ -66,33 +74,40 @@ read_position(RowIndex, ColumnIndex, BoardSize) :-
     column_letter(ColumnIndex, ColLetter),
     format('| Selected Position: Row ~d, Column ~w', [RowIndex, ColLetter]), nl.
 
+is_valid_move(Moves, FromRow, FromCol, ToRow, ToCol, Index) :-
+    member([FromRow, FromCol, ToRow, ToCol, Index], Moves).
 
+has_valid_move(Moves, FromRow, FromCol) :-
+    member([FromRow, FromCol, _, _, _], Moves).
 
-get_player_action([Board, CurrentPlayer, BoardSize], FromRow, FromCol,NewGameState,Moves) :-
+get_player_action([Board, CurrentPlayer, BoardSize], FromRow, FromCol, NewGameState, Moves) :-
     ( \+ is_stack_isolated(Board, BoardSize, FromRow, FromCol) -> 
         write('The stack is not isolated. You must perform a merge.'), nl,
         write('Input to what stack you would like to merge and the index of the piece to split the stack'), nl,
         read_position(ToRow, ToCol, BoardSize),
         read_index(Index, BoardSize),
-        move([Board, CurrentPlayer, BoardSize], [FromRow, FromCol, ToRow, ToCol, Index], NewGameState),
-        ! ;
+        ( is_valid_move(Moves, FromRow, FromCol, ToRow, ToCol, [1]) ->
+            move([Board, CurrentPlayer, BoardSize], [FromRow, FromCol, ToRow, ToCol, Index], NewGameState)
+        ;
+            write('Invalid move. Please try again.'), nl,
+            get_player_action([Board, CurrentPlayer, BoardSize], FromRow, FromCol, NewGameState, Moves)
+        ),
+        !
+    ;
       is_stack_isolated(Board, BoardSize, FromRow, FromCol) ->
         write('The stack is isolated. You can perform a basic move.'), nl,
         write('Input the position to move the stack'), nl,
         read_position(ToRow, ToCol, BoardSize),
-        member([FromRow, FromCol, ToRow, ToCol, Index], Moves) -> write('Valid move'), nl,
-        move([Board, CurrentPlayer, BoardSize], [FromRow, FromCol, ToRow, ToCol, 0], NewGameState),
-        ! 
+        ( is_valid_move(Moves, FromRow, FromCol, ToRow, ToCol, 0) ->
+            move([Board, CurrentPlayer, BoardSize], [FromRow, FromCol, ToRow, ToCol, 0], NewGameState)
+        ;
+            write('Invalid move! Please try again.'), nl,
+            get_player_action([Board, CurrentPlayer, BoardSize], FromRow, FromCol, NewGameState, Moves)
+        ),
+        !
     ).
 
 
-
-
-% Placeholder for performing a basic move
-perform_basic_move(GameState, FromRow, FromCol, BoardSize) :-
-    write('| Performing a basic move...'), nl,
-    % TODO: Implement the logic for basic moves
-    write('| Basic move logic to be implemented here.'), nl.
 
 
 %play PvP
@@ -104,24 +119,19 @@ get_player_move(GameState, NewGameState) :-
     valid_moves(GameState, Moves),
 
     format('Player ~w, select the piece to move:~n', [Char]),
+    repeat,
     read_position(FromRow, FromCol, BoardSize),
-    %piece_specific_moves(GameState, FromRow, FromCol, Moves), 
-    %display_moves(Moves),
-    get_player_action([Board, CurrentPlayer, BoardSize], FromRow, FromCol,TempState,Moves),
-    %get_piece(Board, FromRow, FromCol, Piece, CurrentPlayer),
-    %write('--- Piece Selected ---'), nl,
-    TempState = [NewBoard, CurrentPlayer, BoardSize],
-    NextPlayer is -CurrentPlayer,
-    NewGameState = [NewBoard, NextPlayer, BoardSize],
-    write('------------------------------------------------------------'), nl.
-    
-
-    %piece_belongs_to_player(Piece, CurrentPlayer), !.
-    %format('Player ~w, enter the position to move the piece:~n', [CurrentPlayer]),
-    %read_position(ToRow, ToCol, BoardSize),
-    %write('--- Move ---'), write(FromCol), write(FromRow), write(' to '), write(ToCol), write(ToRow), nl,
-    %move_piece(Board, FromRow, FromCol, ToRow, ToCol, NewBoard),
-    %NewGameState = [NewBoard, CurrentPlayer, BoardSize].
+    ( has_valid_move(Moves, FromRow, FromCol) ->
+        get_player_action([Board, CurrentPlayer, BoardSize], FromRow, FromCol, TempState, Moves),
+        TempState = [NewBoard, CurrentPlayer, BoardSize],
+        NextPlayer is -CurrentPlayer,
+        NewGameState = [NewBoard, NextPlayer, BoardSize],
+        write('------------------------------------------------------------'), nl,
+        !
+    ;
+        write('You cannot play this stack right now.'), nl,
+        fail
+    ).
 
 
 

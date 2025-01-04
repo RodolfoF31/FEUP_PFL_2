@@ -94,19 +94,18 @@ set_piece(Board, Row, Col, Player, UpdatedBoard) :-
 %piece(BOARDBEFORE,COL,ROW,STack,BOARDAFTER)
 set_white_pieces(Board, UpdatedBoard, BoardSize) :-
     (BoardSize == 8 ->
-        %set_piece(Board, 7, 1, [1], Temp1),
-        %set_piece(Temp1, 7, 3, [1], Temp2),
-        %set_piece(Temp2, 7, 5, [1], Temp3),
-        %set_piece(Temp3, 7, 7, [1], Temp4),
-        set_piece(Board, 5, 1, [1], Temp5),
+        set_piece(Board, 7, 1, [1], Temp1),
+        set_piece(Temp1, 7, 3, [1], Temp2),
+        set_piece(Temp2, 7, 5, [1], Temp3),
+        set_piece(Temp3, 7, 7, [1], Temp4),
+        set_piece(Temp4, 5, 1, [1], Temp5),
         set_piece(Temp5, 5, 3, [1], Temp6),
         set_piece(Temp6, 5, 5, [1], Temp7),
         set_piece(Temp7, 5, 7, [1], Temp8),
         set_piece(Temp8, 3, 1, [1], Temp9),
         set_piece(Temp9, 3, 3, [1], Temp10),
         set_piece(Temp10, 3, 5, [1], Temp11),
-        set_piece(Temp11, 8, 5, [1], Temp12),
-        set_piece(Temp12, 3, 7, [1], UpdatedBoard)
+        set_piece(Temp11, 3, 7, [1], UpdatedBoard)
     ;
     BoardSize == 10 ->
         set_piece(Board, 8, 2, [1], Temp1),
