@@ -126,7 +126,7 @@ get_player_move(GameState, NewGameState) :-
         get_player_action([Board, CurrentPlayer, BoardSize, _, _, _, _], FromRow, FromCol, TempState, Moves),
         TempState = [NewBoard, CurrentPlayer, BoardSize, _ ,_,_,_],
         NextPlayer is -CurrentPlayer,
-        NewGameState = [NewBoard, CurrentPlayer, BoardSize, Player1Points, Player2Points, Player1Type, Player2Type],
+        NewGameState = [NewBoard, NextPlayer, BoardSize, Player1Points, Player2Points, Player1Type, Player2Type],
         write('------------------------------------------------------------'), nl,
         !
     ;
@@ -157,3 +157,6 @@ letter_column(ColLetter, ColIndex) :-
     char_code('A', ACode),
     char_code(ColLetter, ColCode),
     ColIndex is ColCode - ACode + 1.
+
+choose_move(GameState,Level,Move) :-
+    write('COMPUTER MOVE').
