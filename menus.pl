@@ -12,6 +12,8 @@ menu :-
     menu_empty_format,
     menu_option_format(1, 'Player vs Player'),
     menu_empty_format,
+    menu_option_format(2, 'Player vs Computer'),
+    menu_empty_format,
     menu_option_format(0, 'EXIT'),
     menu_empty_format,
     menu_end_format,

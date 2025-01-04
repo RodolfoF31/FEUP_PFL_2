@@ -88,7 +88,7 @@ get_player_action([Board, CurrentPlayer, BoardSize,_,_,_,_], FromRow, FromCol, N
         read_position(ToRow, ToCol, BoardSize),
         read_index(Index, BoardSize),
         ( is_valid_move(Moves, FromRow, FromCol, ToRow, ToCol, [1]) ->
-            move([Board, CurrentPlayer, BoardSize], [FromRow, FromCol, ToRow, ToCol, Index], NewGameState)
+            move([Board, CurrentPlayer, BoardSize,_,_,_,_], [FromRow, FromCol, ToRow, ToCol, Index], NewGameState)
         ;
             write('Invalid move. Please try again.'), nl,
             get_player_action([Board, CurrentPlayer, BoardSize], FromRow, FromCol, NewGameState, Moves)
@@ -100,7 +100,7 @@ get_player_action([Board, CurrentPlayer, BoardSize,_,_,_,_], FromRow, FromCol, N
         write('Input the position to move the stack'), nl,
         read_position(ToRow, ToCol, BoardSize),
         ( is_valid_move(Moves, FromRow, FromCol, ToRow, ToCol, 0) ->
-            move([Board, CurrentPlayer, BoardSize], [FromRow, FromCol, ToRow, ToCol, 0], NewGameState)
+            move([Board, CurrentPlayer, BoardSize,_,_,_,_], [FromRow, FromCol, ToRow, ToCol, 0], NewGameState)
         ;
             write('Invalid move! Please try again.'), nl,
             get_player_action([Board, CurrentPlayer, BoardSize], FromRow, FromCol, NewGameState, Moves)
