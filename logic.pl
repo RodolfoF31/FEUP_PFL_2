@@ -4,34 +4,33 @@ min_list([Min], Min).
 min_list([H|T], Min) :-
     min_list(T, MinTail),
     Min is min(H, MinTail).
-% game_over(+GameState, -Winner)
-% Determines if the game is over and declares the winner based on majority 8-piece stacks.
-game_over(GameState, Winner) :-
-    GameState = [Board, _, _], % Extract the board from the game state
-    findall(Player, (member(Row, Board), member(Stack, Row), is_winning_stack(Stack, Player)), Winners),
-    count_majority(Winners, Winner).
 
-% Helper predicate to check if a stack is a winning stack
-is_winning_stack(Stack, Player) :-
-    length(Stack, 8), 
-    last(Stack, Player).
-
-% count_majority(+Winners, -Winner)
-% Determines the player with the majority of the winning stacks
-count_majority(Winners, Winner) :-
-    count_occurrences(Winners, 1, Count1),
-    count_occurrences(Winners, 2, Count2),
-    ( Count1 > Count2 -> Winner = 1
-    ; Count2 > Count1 -> Winner = 2
-    ; fail 
+% Check if the game is over
+game_over([_, _, _, Player1Points, Player2Points, _, _], Winner) :-
+    ( Player1Points >= 2 ->
+        Winner = 'Player 1'
+    ; Player2Points >= 2 ->
+        Winner = 'Player 2'
     ).
 
-% count_occurrences(+List, +Element, -Count)
-% Counts occurrences of Element in List
-count_occurrences(List, Element, Count) :-
-    include(=(Element), List, Filtered),
-    length(Filtered, Count).
+check_stack_of_8([Board, CurrentPlayer, BoardSize, Player1Points, Player2Points, Player1Type, Player2Type], [NewBoard, CurrentPlayer, BoardSize, NewPlayer1Points, NewPlayer2Points, Player1Type, Player2Type]) :-
+    findall([Row, Col], (nth1(Row, Board, BoardRow), nth1(Col, BoardRow, Stack), length(Stack, 8)), StacksOf8),
+    update_board_and_points(Board, StacksOf8, Player1Points, Player2Points, NewBoard, NewPlayer1Points, NewPlayer2Points).
 
+update_board_and_points(Board, [], Player1Points, Player2Points, Board, Player1Points, Player2Points).
+update_board_and_points(Board, [[Row, Col] | Rest], Player1Points, Player2Points, NewBoard, NewPlayer1Points, NewPlayer2Points) :-
+    nth1(Row, Board, BoardRow),
+    nth1(Col, BoardRow, Stack),
+    last(Stack, TopPiece),
+    ( TopPiece = 1 ->
+        UpdatedPlayer1Points is Player1Points + 1,
+        UpdatedPlayer2Points is Player2Points
+    ; TopPiece = -1 ->
+        UpdatedPlayer1Points is Player1Points,
+        UpdatedPlayer2Points is Player2Points + 1
+    ),
+    set_piece_for_basicmove(Board, Row, Col, [], TempBoard),
+    update_board_and_points(TempBoard, Rest, UpdatedPlayer1Points, UpdatedPlayer2Points, NewBoard, NewPlayer1Points, NewPlayer2Points).
 
 % BASIC MOVES
 
@@ -219,8 +218,8 @@ merge_stacks(Board, FromRow, FromCol, ToRow, ToCol, Index, NewBoard) :-
     get_stack(Board, ToRow, ToCol, ToStack),
     
     % Merge stacks at the given index
-    length(Keep, IndexMinusOne),
     IndexMinusOne is Index - 1,
+    length(Keep, IndexMinusOne),
     append(Keep, ToMerge, FromStack),
     
     % Merge ToMerge from FromStack into ToStack
