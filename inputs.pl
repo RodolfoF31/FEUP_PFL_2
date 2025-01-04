@@ -80,6 +80,7 @@ get_player_action([Board, CurrentPlayer, BoardSize], FromRow, FromCol,NewGameSta
         write('The stack is isolated. You can perform a basic move.'), nl,
         write('Input the position to move the stack'), nl,
         read_position(ToRow, ToCol, BoardSize),
+        member([FromRow, FromCol, ToRow, ToCol, Index], Moves) -> write('Valid move'), nl,
         move([Board, CurrentPlayer, BoardSize], [FromRow, FromCol, ToRow, ToCol, 0], NewGameState),
         ! 
     ).

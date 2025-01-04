@@ -76,7 +76,9 @@ valid_moves([Board, CurrentPlayer, BoardSize], Moves) :-
 
         PossibleMovesWithDistance = [FirstMove | _],
 
-        filter_smalles_moves(PossibleMovesWithDistance, FirstMove, TempMovesFromPosition, FilteredMoves)
+        FilteredMovesResult = [],
+        filter_smalles_moves(PossibleMovesWithDistance, FirstMove, TempMovesFromPosition, FilteredMovesResult,FilteredMoves)
+        
     ;
         FilteredMoves = []
     ),
@@ -88,31 +90,41 @@ valid_moves([Board, CurrentPlayer, BoardSize], Moves) :-
     append(NonIsolatedMoves, FilteredMoves, Moves),
     write('All Moves: '), write(Moves), nl.
 
-% filter_smalles_moves(+PossibleMovesWithDistance, +IterMove, +TempMovesFromPosition, -FilteredMoves)
-filter_smalles_moves([], _, _, FilteredMoves).
-filter_smalles_moves([[FromRow, FromCol, Distance, ToRow, ToCol]], _, TempMovesFromPosition, FilteredMoves):-
-    append(TempMovesFromPosition, [[FromRow, FromCol, ToRow, ToCol,0]], FilteredMoves).
-filter_smalles_moves([[FromRow, FromCol, Distance, ToRow, ToCol] | Rest], IterMove, TempMovesFromPosition, FilteredMoves) :-
+change_last([_], NewValue, [NewValue]).
+change_last([Head|Tail], NewValue, [Head|NewTail]) :-
+    change_last(Tail, NewValue, NewTail). 
+
+last_or_single([X], X).
+last_or_single([_ | Tail], Last) :-
+    last_or_single(Tail, Last).
+
+filter_smalles_moves([], _, TempMovesFromPosition, FilteredMovesResult,FilteredMoves) :-
+    last_or_single(TempMovesFromPosition, LastMove),
+    LastMove = [TempRow,TempCol,_,TempToRow,TempToCol],
+    change_last(TempMovesFromPosition, [TempRow,TempCol,TempToRow,TempToCol,0], TempMovesFromPosition1),
+    append(TempMovesFromPosition1, FilteredMovesResult, FilteredMovesResult1),
+    FilteredMoves = FilteredMovesResult1.
+filter_smalles_moves([[FromRow, FromCol, Distance, ToRow, ToCol] | Rest], IterMove, TempMovesFromPosition, FilteredMovesResult,FilteredMoves) :-
 
     (IterMove = [IterFr, IterFc, IterDist, IterTr, IterTc] ->
         (FromRow == IterFr, FromCol == IterFc ->
             (Distance < IterDist ->
-                TempMovesFromPosition1 = [[FromRow, FromCol, ToRow, ToCol,0]],
-                filter_smalles_moves(Rest, [FromRow, FromCol, Distance, ToRow, ToCol], TempMovesFromPosition1, FilteredMoves)
+                TempMovesFromPosition1 = [[FromRow, FromCol, ToRow, ToCol, 0]],
+                filter_smalles_moves(Rest, [FromRow, FromCol, Distance, ToRow, ToCol], TempMovesFromPosition1, FilteredMovesResult,FilteredMoves)
             ;
             Distance == IterDist ->
-                append([[FromRow, FromCol, ToRow, ToCol,0]], TempMovesFromPosition, TempMovesFromPosition1),
-                filter_smalles_moves(Rest, IterMove, TempMovesFromPosition1, FilteredMoves)
+                append([[FromRow, FromCol, ToRow, ToCol, 0]], TempMovesFromPosition, TempMovesFromPosition1),
+                filter_smalles_moves(Rest, IterMove, TempMovesFromPosition1, FilteredMovesResult,FilteredMoves)
             ;
             Distance > IterDist ->
-                filter_smalles_moves(Rest, IterMove, TempMovesFromPosition, FilteredMoves)
+                filter_smalles_moves(Rest, IterMove, TempMovesFromPosition, FilteredMovesResult ,FilteredMoves)
             )
         ;
-        append(TempMovesFromPosition, FilteredMoves, FilteredMoves1),
-        filter_smalles_moves(Rest, [FromRow, FromCol, Distance, ToRow, ToCol], [[FromRow, FromCol, Distance, ToRow, ToCol]], FilteredMoves1)
+        append(TempMovesFromPosition, FilteredMovesResult, FilteredMovesResult1),
+        filter_smalles_moves(Rest, [FromRow, FromCol, Distance, ToRow, ToCol], [[FromRow, FromCol, Distance, ToRow, ToCol]], FilteredMovesResult1,FilteredMoves)
         )
     ;
-    filter_smalles_moves(Rest, [FromRow, FromCol, Distance, ToRow, ToCol], [[FromRow, FromCol, ToRow, ToCol,0]], FilteredMoves)
+    filter_smalles_moves(Rest, [FromRow, FromCol, Distance, ToRow, ToCol], [[FromRow, FromCol, ToRow, ToCol, 0]], FilteredMoves)
     ).
 
 isolated_moves(FromRow, FromCol, ToRow, ToCol, BoardSize) :-
@@ -177,9 +189,7 @@ move([Board, CurrentPlayer, BoardSize], [FromRow, FromCol, ToRow, ToCol, Index],
         get_stack(Board, FromRow, FromCol, Stack),
         set_piece_for_basicmove(Board, FromRow, FromCol, [], TempBoard),
         set_piece_for_basicmove(TempBoard, ToRow, ToCol, Stack, NewBoard),
-        write('Stack moved successfully!'), nl,
-        display_board(NewBoard, BoardSize),
-        sleep(1000000000)
+        write('Stack moved successfully!'), nl
         
     ).
 
