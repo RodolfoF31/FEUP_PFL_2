@@ -39,7 +39,8 @@ menu_option(1) :-
     
     %hardcode but should ask user is wants 8x8 or 10x10
     menu_choose_size(BoardSize),
-    initial_state([_,BoardSize],[_,1,_]).
+    GameConfig = ['Pvp', BoardSize, 0, 0],
+    initial_state(GameConfig,GameState).
 
 
 

@@ -5,11 +5,12 @@
 
 initial_state(GameConfig, GameState):-
 
+    %
     % Create the board and player according to the game configuration (mode and boards size)
-    GameConfig = [Mode, BoardSize],
-    CurrentPlayer = 1, % Player 1 starts the game
+    GameConfig = [Mode, BoardSize, Player1Type, Player2Type],
     initialize_board(BoardSize, Board),
-    GameState = [Board, CurrentPlayer,BoardSize],
+
+    GameState = [Board, 1, BoardSize, 0, 0,Player1Type,Player2Type],
     write('Initial State: '), write(GameState), nl,
     write('Initial configuration: '), write(GameConfig), nl,   
 
@@ -174,7 +175,7 @@ next_col(CurrentCol, NextCol) :-
 
 % Display the game state
 display_game(GameState) :-
-    GameState = [Board, CurrentPlayer,BoardSize],
+    GameState = [Board, CurrentPlayer, BoardSize, Player1Points, Player2Points ,Player1Type,Player2Type],
     write('Current Player: '), write(CurrentPlayer), nl,
     (CurrentPlayer = 1 -> write('White (O)'); write('Black (X)')), nl, nl,
     %call BoardSize

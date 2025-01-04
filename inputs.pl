@@ -113,7 +113,7 @@ get_player_action([Board, CurrentPlayer, BoardSize], FromRow, FromCol, NewGameSt
 %play PvP
 get_player_move(GameState, NewGameState) :-
     write('--- Player Move ------------------------------------------------------------------------------------------------'), nl,
-    GameState = [Board, CurrentPlayer, BoardSize],
+    GameState = [Board, CurrentPlayer, BoardSize, Player1Points, Player2Points, Player1Type, Player2Type],
     player_char(CurrentPlayer, Char),
 
     valid_moves(GameState, Moves),
@@ -122,10 +122,10 @@ get_player_move(GameState, NewGameState) :-
     repeat,
     read_position(FromRow, FromCol, BoardSize),
     ( has_valid_move(Moves, FromRow, FromCol) ->
-        get_player_action([Board, CurrentPlayer, BoardSize], FromRow, FromCol, TempState, Moves),
-        TempState = [NewBoard, CurrentPlayer, BoardSize],
+        get_player_action([Board, CurrentPlayer, BoardSize, _, _, _, _], FromRow, FromCol, TempState, Moves),
+        TempState = [NewBoard, CurrentPlayer, BoardSize, _ ,_,_,_],
         NextPlayer is -CurrentPlayer,
-        NewGameState = [NewBoard, NextPlayer, BoardSize],
+        NewGameState = [NewBoard, CurrentPlayer, BoardSize, Player1Points, Player2Points, Player1Type, Player2Type],
         write('------------------------------------------------------------'), nl,
         !
     ;

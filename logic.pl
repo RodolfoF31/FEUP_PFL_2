@@ -51,8 +51,9 @@ player_piece(Board, Player, Row, Col) :-
     Piece \= [].
 
 
-% valid_moves(+GameState, -Moves)
-valid_moves([Board, CurrentPlayer, BoardSize], Moves) :-
+% valid_moves(+GameState, -Moves)          GameState = [Board, CurrentPlayer, BoardSize, Player1Points, Player2Points, Player1Type, Player2Type],
+
+valid_moves([Board, CurrentPlayer, BoardSize, _, _, _, _], Moves) :-
     findall([Row, Col], player_piece(Board, CurrentPlayer, Row, Col), Positions),
     findall([Row, Col], (nth1(Row, Board, BoardRow), nth1(Col, BoardRow, Piece), Piece \= []), AllPieces),
     % divide positions into isolated and non-isolated
@@ -85,8 +86,9 @@ valid_moves([Board, CurrentPlayer, BoardSize], Moves) :-
 
     findall([FromRow, FromCol, ToRow, ToCol, StackPosition],
             (member([FromRow, FromCol], NonIsolatedPositions),
-             non_isolated_moves(FromRow, FromCol, ToRow, ToCol, StackPosition, [Board, CurrentPlayer, BoardSize])),
+             non_isolated_moves(FromRow, FromCol, ToRow, ToCol, StackPosition, [Board, CurrentPlayer, BoardSize,_,_,_,_])),
             NonIsolatedMoves),
+
     append(NonIsolatedMoves, FilteredMoves, Moves),
     write('All Moves: '), write(Moves), nl.
 
@@ -169,7 +171,8 @@ distance_between(FromRow, FromCol, ToRow, ToCol, Distance) :-
     EuclideanDistance is sqrt(DeltaRow * DeltaRow + DeltaCol * DeltaCol),
     Distance is floor(EuclideanDistance).
 
-non_isolated_moves(FromRow, FromCol, ToRow, ToCol, StackPosition, [Board, CurrentPlayer, BoardSize]):-
+%[Board, CurrentPlayer, BoardSize, Player1Points, Player2Points, Player1Type, Player2Type]
+non_isolated_moves(FromRow, FromCol, ToRow, ToCol, StackPosition, [Board, CurrentPlayer, BoardSize, _, _, _, _]):-
     %check is not empty
     adjacent_position_diagonal(FromRow, FromCol, ToRow, ToCol),
     within_bounds(ToRow, ToCol, BoardSize),
@@ -179,7 +182,7 @@ non_isolated_moves(FromRow, FromCol, ToRow, ToCol, StackPosition, [Board, Curren
     StackPosition \= [].
 
 
-move([Board, CurrentPlayer, BoardSize], [FromRow, FromCol, ToRow, ToCol, Index], [NewBoard, CurrentPlayer, BoardSize]) :-
+move([Board, CurrentPlayer, BoardSize, _, _, _, _], [FromRow, FromCol, ToRow, ToCol, Index], [NewBoard, CurrentPlayer, BoardSize,_,_,_,_]) :-
     ( Index =\= 0 ->
         merge_stacks(Board, FromRow, FromCol, ToRow, ToCol, Index, NewBoard),
         write('Stack merged successfully!'), nl
