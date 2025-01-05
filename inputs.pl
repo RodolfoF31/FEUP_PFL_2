@@ -17,9 +17,9 @@ read_row(RowIndex, BoardSize) :-
     peek_char(Enter),
     Enter == '\n',
     char_code(Char, ASCIICode),
-    number_char(Char, RowIndex),  % Convert to number
+    number_char(Char, RowIndex),  
     RowIndex >= 1,
-    RowIndex =< BoardSize,   % Ensure the row is within the board size
+    RowIndex =< BoardSize,   
     skip_line, !.
 
 read_index(Index, BoardSize) :-
@@ -168,6 +168,7 @@ letter_column(ColLetter, ColIndex) :-
 
 
 play_computer_move(GameState, Level, NewGameState):-
+    GameState = [Board, CurrentPlayer, BoardSize, Player1Points, Player2Points, Player1Type, Player2Type],
     choose_move(GameState, Level, Move),
     (Move = [_, _, _, _, Indexes], is_list(Indexes) ->
         random_member(Index, Indexes),
@@ -175,10 +176,12 @@ play_computer_move(GameState, Level, NewGameState):-
     ;
         MoveWithIndex = Move
     ),
-    (Move \= [] -> move(GameState, Move, TempState);
+    (Move \= [] -> move(GameState, Move, TempState)
+    ;
     write('No valid moves available. Passing turn.'), nl
     ),
     TempState = [NewBoard, CurrentPlayer, BoardSize, _ ,_,_,_],
     NextPlayer is -CurrentPlayer,
-    NewGameState = [NewBoard, NextPlayer, BoardSize, Player1Points, Player2Points, Player1Type, Player2Type].
+    NewGameState = [NewBoard, NextPlayer, BoardSize, Player1Points, Player2Points, Player1Type, Player2Type],
+    write(NewState),write(GameState).
 

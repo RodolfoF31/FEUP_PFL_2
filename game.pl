@@ -33,5 +33,21 @@ game_loop(GameState) :-
         game_loop(NewGameState)
     ).
 
-    
-    
+game_loop_pvc(GameState) :-
+    GameState = [Board, CurrentPlayer, BoardSize, Player1Points, Player2Points, Player1Type, Player2Type],
+
+    display_game(GameState),
+
+    (game_over(GameState, Winner) ->
+        format('Game over! The winner is ~w.', [Winner]), nl
+    ;
+        (CurrentPlayer =:= 1 ->
+            get_player_move(GameState, TempState)
+        ;
+            write('Computer\'s turn'), nl,
+            play_computer_move(GameState, Player2Type, TempState)
+        ),
+        TempState = [TempBoard, NextPlayer, BoardSize, TempPlayer1Points, TempPlayer2Points, Player1Type, Player2Type],
+        check_stack_of_8([TempBoard, NextPlayer, BoardSize, TempPlayer1Points, TempPlayer2Points, Player1Type, Player2Type], NewGameState),
+        game_loop_pvc(NewGameState)
+    ).

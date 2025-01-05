@@ -14,7 +14,13 @@ initial_state(GameConfig, GameState):-
     write('Initial State: '), write(GameState), nl,
     write('Initial configuration: '), write(GameConfig), nl,   
 
-    game_loop(GameState).
+    (Mode = 'Pvp' -> 
+        game_loop(GameState)
+    ;
+    Mode = 'Pvc' ->
+        game_loop_pvc(GameState)
+    
+    ).
 
 
 
@@ -177,6 +183,9 @@ next_col(CurrentCol, NextCol) :-
 display_game(GameState) :-
     GameState = [Board, CurrentPlayer, BoardSize, Player1Points, Player2Points ,Player1Type,Player2Type],
     write('Current Player: '), write(CurrentPlayer), nl,
+
+    write(GameState),
+
     (CurrentPlayer = 1 -> write('White (O)'); write('Black (X)')), nl, nl,
     %call BoardSize
     display_board(Board,BoardSize),

@@ -322,15 +322,18 @@ adjacent_position_diagonal(FromRow, FromCol, ToRow, ToCol) :-
 
 choose_move(GameState, Level, Move):-
     valid_moves(GameState, Moves),
-    (Level == 1->
+>>    (Level == 1->
+        write('Level 1'), nl,
         random_member(M, Moves),
-        (M = [_, _, _, _, Indexes], is_list(Indexes) ->
-        random_member(Index, Indexes),
-        Move = [FromRow, FromCol, ToRow, ToCol, Index]
+        (M = [FromRow, FromCol, ToRow, ToCol, Indexes], is_list(Indexes) ->
+            random_member(Index, Indexes),
+            Move = [FromRow, FromCol, ToRow, ToCol, Index]
         ;
-        Move = M
-        )
+            Move = M
+        ),
+        !
     ;
+    write('Level 2'), nl,
        findall(Value-M, (
         member(M, Moves),
         (M = [_, _, _, _, Indexes], is_list(Indexes) ->
@@ -339,10 +342,10 @@ choose_move(GameState, Level, Move):-
         ;
             MoveWithIndex = M
         ),
-        move(GameState, MoveWithIndex, NewGameState),
-        value(NewGameState, Player, Value)
+        move(GameState, MoveWithIndex, NewGameState)
+        %value(NewGameState, Player, Value)
         ), ValuedMoves),
-        max_member(_-Move, ValuedMoves)
+        max_member(_-Move, ValuedMoves),!
     ).
 
 value(GameState,Player,Value):-
