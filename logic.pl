@@ -317,3 +317,12 @@ adjacent_position_diagonal(FromRow, FromCol, ToRow, ToCol) :-
     (ToRow is FromRow + 1, ToCol is FromCol + 1). % Bottom-right
 
 
+choose_move(GameState, Level, Move):-
+    valid_moves(GameState, Moves),
+    (Level == 1->
+        random_member(Move, Moves)
+    ;
+        write('To be implemented')
+    ).
+    write('Choosing move...'), nl.
+
