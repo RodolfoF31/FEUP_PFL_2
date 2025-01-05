@@ -8,9 +8,9 @@ min_list([H|T], Min) :-
 % Check if the game is over
 game_over([_, _, _, Player1Points, Player2Points, _, _], Winner) :-
     ( Player1Points >= 2 ->
-        Winner = 'Player 1'
+        Winner = 'White'
     ; Player2Points >= 2 ->
-        Winner = 'Player 2'
+        Winner = 'Black'
     ).
 
 check_stack_of_8([Board, CurrentPlayer, BoardSize, Player1Points, Player2Points, Player1Type, Player2Type], [NewBoard, CurrentPlayer, BoardSize, NewPlayer1Points, NewPlayer2Points, Player1Type, Player2Type]) :-
