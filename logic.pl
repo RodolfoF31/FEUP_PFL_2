@@ -81,6 +81,7 @@ valid_moves([Board, CurrentPlayer, BoardSize, _, _, _, _], Moves) :-
         PossibleMovesWithDistance = [FirstMove | _],
 
         FilteredMovesResult = [],
+        TempMovesFromPosition = [],
         filter_smalles_moves(PossibleMovesWithDistance, FirstMove, TempMovesFromPosition, FilteredMovesResult,FilteredMoves)
         
     ;
@@ -103,32 +104,37 @@ last_or_single([X], X).
 last_or_single([_ | Tail], Last) :-
     last_or_single(Tail, Last).
 
-filter_smalles_moves([], _, TempMovesFromPosition, FilteredMovesResult,FilteredMoves) :-
+filter_smalles_moves([], _, TempMovesFromPosition, FilteredMovesResult, FilteredMoves) :-
     last_or_single(TempMovesFromPosition, LastMove),
-    LastMove = [TempRow,TempCol,_,TempToRow,TempToCol],
-    change_last(TempMovesFromPosition, [TempRow,TempCol,TempToRow,TempToCol,0], TempMovesFromPosition1),
+    change_last(TempMovesFromPosition, LastMove, TempMovesFromPosition1),
     append(TempMovesFromPosition1, FilteredMovesResult, FilteredMovesResult1),
+    format('Final TempMovesFromPosition: ~w~n', [TempMovesFromPosition1]),
+    format('Final FilteredMovesResult: ~w~n', [FilteredMovesResult1]),
     FilteredMoves = FilteredMovesResult1.
-filter_smalles_moves([[FromRow, FromCol, Distance, ToRow, ToCol] | Rest], IterMove, TempMovesFromPosition, FilteredMovesResult,FilteredMoves) :-
-
+filter_smalles_moves([[FromRow, FromCol, Distance, ToRow, ToCol] | Rest], IterMove, TempMovesFromPosition, FilteredMovesResult, FilteredMoves) :-
     (IterMove = [IterFr, IterFc, IterDist, IterTr, IterTc] ->
         (FromRow == IterFr, FromCol == IterFc ->
             (Distance < IterDist ->
                 TempMovesFromPosition1 = [[FromRow, FromCol, ToRow, ToCol, 0]],
-                filter_smalles_moves(Rest, [FromRow, FromCol, Distance, ToRow, ToCol], TempMovesFromPosition1, FilteredMovesResult,FilteredMoves)
+                format('Updating TempMovesFromPosition with smaller distance: ~w~n', [TempMovesFromPosition1]),
+                filter_smalles_moves(Rest, [FromRow, FromCol, Distance, ToRow, ToCol], TempMovesFromPosition1, FilteredMovesResult, FilteredMoves)
             ;
             Distance == IterDist ->
                 append([[FromRow, FromCol, ToRow, ToCol, 0]], TempMovesFromPosition, TempMovesFromPosition1),
-                filter_smalles_moves(Rest, IterMove, TempMovesFromPosition1, FilteredMovesResult,FilteredMoves)
+                format('Appending to TempMovesFromPosition with equal distance: ~w~n', [TempMovesFromPosition1]),
+                filter_smalles_moves(Rest, IterMove, TempMovesFromPosition1, FilteredMovesResult, FilteredMoves)
             ;
             Distance > IterDist ->
-                filter_smalles_moves(Rest, IterMove, TempMovesFromPosition, FilteredMovesResult ,FilteredMoves)
+                format('Skipping move with larger distance: ~w~n', [[FromRow, FromCol, Distance, ToRow, ToCol]]),
+                filter_smalles_moves(Rest, IterMove, TempMovesFromPosition, FilteredMovesResult, FilteredMoves)
             )
         ;
         append(TempMovesFromPosition, FilteredMovesResult, FilteredMovesResult1),
-        filter_smalles_moves(Rest, [FromRow, FromCol, Distance, ToRow, ToCol], [[FromRow, FromCol, Distance, ToRow, ToCol]], FilteredMovesResult1,FilteredMoves)
+        format('New origin position, updating FilteredMovesResult: ~w~n', [FilteredMovesResult1]),
+        filter_smalles_moves(Rest, [FromRow, FromCol, Distance, ToRow, ToCol], [[FromRow, FromCol, Distance, ToRow, ToCol]], FilteredMovesResult1, FilteredMoves)
         )
     ;
+    format('Initializing TempMovesFromPosition: ~w~n', [[FromRow, FromCol, ToRow, ToCol, 0]]),
     filter_smalles_moves(Rest, [FromRow, FromCol, Distance, ToRow, ToCol], [[FromRow, FromCol, ToRow, ToCol, 0]], FilteredMoves)
     ).
 

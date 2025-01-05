@@ -157,3 +157,6 @@ letter_column(ColLetter, ColIndex) :-
     char_code('A', ACode),
     char_code(ColLetter, ColCode),
     ColIndex is ColCode - ACode + 1.
+
+choose_move(GameState,Level,Move) :-
+    write('COMPUTER MOVE').

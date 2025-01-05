@@ -16,10 +16,8 @@
 play :-
     clear_screen,
     menu.
-%[Board, CurrentPlayer, BoardSize,Mode,POintsWHite,POintsBlack]
-% Mode = PVP ->         NextPlayer is -CurrentPlayer, NewGameState = [NewBoard, NextPlayer, BoardSize],
-% Mode = PVC ->         NextPlayer is CUSTOMVAR, NewGameState = [NewBoard, NextPlayer, BoardSize],
-% MODE = CVC ->         NEXTPLAYER IS CUSTOMVAR2, NEWGAMESTATE = [NEWBOARD, NEXTPLAYER, BOARDSIZE],     
+
+%Player 1 -> O || Player 2 -> X
 game_loop(GameState) :-
     GameState = [Board, CurrentPlayer, BoardSize, Player1Points, Player2Points, Player1Type, Player2Type],
     
