@@ -22,12 +22,16 @@ update_board_and_points(Board, [[Row, Col] | Rest], Player1Points, Player2Points
     nth1(Row, Board, BoardRow),
     nth1(Col, BoardRow, Stack),
     last(Stack, TopPiece),
-    ( TopPiece = 1 ->
+    write('Top piece: '), write(TopPiece), nl,  % Debug statement added here
+    ( TopPiece = 1 -> % Assuming 1 represents Player 1 (white)
         UpdatedPlayer1Points is Player1Points + 1,
         UpdatedPlayer2Points is Player2Points
-    ; TopPiece = -1 ->
+    ; TopPiece = -1 -> % Assuming -1 represents Player 2 (black)
         UpdatedPlayer1Points is Player1Points,
         UpdatedPlayer2Points is Player2Points + 1
+    ; % Defensive fallback to prevent point assignment errors
+        UpdatedPlayer1Points is Player1Points,
+        UpdatedPlayer2Points is Player2Points
     ),
     set_piece_for_basicmove(Board, Row, Col, [], TempBoard),
     update_board_and_points(TempBoard, Rest, UpdatedPlayer1Points, UpdatedPlayer2Points, NewBoard, NewPlayer1Points, NewPlayer2Points).
