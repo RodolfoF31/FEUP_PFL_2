@@ -186,9 +186,11 @@ No BYTE, não há empates. O predicado `game_over/2` verifica se um dos jogadore
 ### Jogada do Computador
 
 Dois níveis de dificuldade foram implementados:
-- **Nível 1**: Escolhe uma jogada aleatória usando o predicado `random`.
-- **Nível 2**: (Em desenvolvimento).
+- **Nível 1**: Escolhe uma jogada aleatória usando o predicado `random` dos valid_moves.
+- **Nível 2**: Para o nível dois, implementámos um predicado `value` que avalia o estado do jogo e retorna um valor numérico que representa quão favorável ou desfavorável o jogo está para o jogador atual. Esta função baseia-se em várias heurísticas. A avaliação considera os seguintes fatores: o número de pilhas completas conquistadas pelo jogador, o número de pilhas controladas pelo jogador (com a sua peça no topo), o número total de pilhas que contêm pelo menos uma peça do jogador, a soma das alturas das pilhas controladas pelo jogador e a proximidade das pilhas do jogador de atingir a altura máxima de 8 (necessária para ganhar a pilha). Estes fatores também são calculados para o adversário, e as diferenças entre as métricas do jogador e do adversário contribuem para o valor final. Para decidir o próximo movimento, simulamos todos os movimentos válidos, calculamos o valor correspondente a cada estado resultante e escolhemos o movimento que nos coloca em vantagem.
 
+
+This Prolog function, value/3, evaluates the quality of a game state for a given player in the board game Byte. It computes a numerical value based on various heuristics to assess the player's advantage relative to their opponent. The evaluation considers the following factors: the number of stacks the player has completed (win stacks), the number of stacks the player controls with their piece on top, the total number of stacks containing at least one of the player's pieces, the cumulative height of stacks controlled by the player, and the proximity of the player's stacks to the maximum height of 8 (which would secure a win). These factors are calculated similarly for the opponent, and the differences between the player’s and opponent's metrics contribute to the final evaluation score. Higher values favor the player, while lower values indicate an advantageous state for the opponent. The evaluation incorporates positional and strategic considerations, aiming to guide AI decisions effectively.
 ### Conclusões
 
 A implementação do predicado `valid_moves/2` foi um dos maiores desafios devido à complexidade das regras do jogo. Isso consumiu grande parte do tempo de desenvolvimento, deixando pouco espaço para refatoração e organização final do código.

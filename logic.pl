@@ -327,28 +327,30 @@ choose_move(GameState, Level, Move):-
             random_member(Index, Indexes),
             Move = [FromRow, FromCol, ToRow, ToCol, Index]
         ;
+            M = [FromRow, FromCol, ToRow, ToCol, Indexes],
+            Indexes = 0,
+            write('MOVE: '), write(M), nl,
             Move = M
         ),
         !
     ;
     write('Level 2'), nl,
-    findall(Value-M, (
+    findall(Value-MoveWithIndex, (
         member(M, Moves),
         (M = [FromRow, FromCol, ToRow, ToCol, Indexes], is_list(Indexes) ->
             member(Index, Indexes),
             MoveWithIndex = [FromRow, FromCol, ToRow, ToCol, Index]
         ;
+            M = [FromRow, FromCol, ToRow, ToCol, Indexes],
+            Indexes = 0,
             MoveWithIndex = M
         ),
         move(GameState, MoveWithIndex, TempState),
         TempState = [NewBoard, CurrentPlayer, BoardSize, _, _, _, _],
         NewGameState = [NewBoard, CurrentPlayer, BoardSize, Player1Points, Player2Points, Player1Type, Player2Type],
-        value(NewGameState, CurrentPlayer, Value),
-        write('Move: '), write(MoveWithIndex), write(' Value: '), write(Value), nl
+        value(NewGameState, CurrentPlayer, Value)
     ), ValuedMoves),
-    write('All valued moves: '), write(ValuedMoves), nl,
     max_member(V-Move, ValuedMoves),
-    write('Chosen move: '), write(Move),write('Valeu->'),write(V), nl,sleep(3),
     !
     ).
 
@@ -389,9 +391,8 @@ top_stack_owned([Board, _, _, _, _, _, _], Player, Count) :-
         Stack \= [], 
         last_or_single(Stack, Player)), 
         Positions),
-    write('Top stack owned: '), write(Positions), nl,
     length(Positions, Temp),
-    Count = Temp * 10.
+    Count is Temp * 10.
 
 stacks_owned([Board, _, _, _, _, _, _], Player, Count) :-
     findall([Row, Col], player_piece(Board, Player, Row, Col), Positions),

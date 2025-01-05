@@ -54,6 +54,11 @@ menu_choose_level(Level):-
     write('Level chosen: '), write(Level), nl.
 
 
+menu_option(0):-
+    clear_screen,
+    write('Thank You For Playing'), nl,
+    abort.
+
 menu_option(1) :-
     write('Starting Player vs Player mode...'), nl,
     
