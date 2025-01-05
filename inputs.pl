@@ -182,6 +182,6 @@ play_computer_move(GameState, Level, NewGameState):-
     ),
     TempState = [NewBoard, CurrentPlayer, BoardSize, _ ,_,_,_],
     NextPlayer is -CurrentPlayer,
-    NewGameState = [NewBoard, NextPlayer, BoardSize, Player1Points, Player2Points, Player1Type, Player2Type],
-    write(NewState),write(GameState).
+    NewGameState = [NewBoard, NextPlayer, BoardSize, Player1Points, Player2Points, Player1Type, Player2Type].
+    
 
