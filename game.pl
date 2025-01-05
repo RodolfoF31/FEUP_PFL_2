@@ -60,8 +60,11 @@ game_loop_cvc(GameState) :-
     (game_over(GameState, Winner) ->
         format('Game over! The winner is ~w.', [Winner]), nl
     ;
-
-        play_computer_move(GameState, Player1Type, TempState),
+        (CurrentPlayer =:= 1 ->
+            play_computer_move(GameState, Player1Type, TempState)
+        ;
+            play_computer_move(GameState, Player2Type, TempState)
+        ),
         TempState = [TempBoard, NextPlayer, BoardSize, TempPlayer1Points, TempPlayer2Points, Player1Type, Player2Type],
         check_stack_of_8([TempBoard, NextPlayer, BoardSize, TempPlayer1Points, TempPlayer2Points, Player1Type, Player2Type], NewGameState),
         sleep(1),
