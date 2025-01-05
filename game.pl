@@ -60,7 +60,6 @@ game_loop_cvc(GameState) :-
     (game_over(GameState, Winner) ->
         format('Game over! The winner is ~w.', [Winner]), nl
     ;
-
         (CurrentPlayer =:= 1 ->
             play_computer_move(GameState, Player1Type, TempState)
         ;
