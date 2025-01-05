@@ -22,7 +22,6 @@ update_board_and_points(Board, [[Row, Col] | Rest], Player1Points, Player2Points
     nth1(Row, Board, BoardRow),
     nth1(Col, BoardRow, Stack),
     last(Stack, TopPiece),
-    write('Top piece: '), write(TopPiece), nl,  % Debug statement added here
     ( TopPiece = 1 -> % Assuming 1 represents Player 1 (white)
         UpdatedPlayer1Points is Player1Points + 1,
         UpdatedPlayer2Points is Player2Points

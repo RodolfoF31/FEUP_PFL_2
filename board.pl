@@ -181,7 +181,7 @@ display_game(GameState) :-
     %call BoardSize
     display_board(Board,BoardSize),
     format('White has ~d points~n', [Player1Points]),
-    format('Black has ~d points~n', [Player1Points]).
+    format('Black has ~d points~n', [Player2Points]).
 
 
 % Display the board
