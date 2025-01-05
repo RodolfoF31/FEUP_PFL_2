@@ -325,7 +325,36 @@ choose_move(GameState, Level, Move):-
     (Level == 1->
         random_member(Move, Moves)
     ;
-        write('To be implemented')
+       findall(Value-M, (
+        member(M, Moves),
+        move(GameState, M, NewGameState),
+        value(NewGameState, Player, Value)
+        ), ValuedMoves),
+        max_member(_-Move, ValuedMoves)
     ).
-    write('Choosing move...'), nl.
 
+value(GameState,Player,Value):-
+    stacks_owned(GameState, Player, PlayerStacks), % Count stacks owned by the player
+    stacks_owned(GameState, -Player, OpponentStacks), % Count opponent stacks
+    stack_height_value(GameState, Player, PlayerHeightValue), % Value from stack heights for the player
+    stack_height_value(GameState, -Player, OpponentHeightValue), % For the opponent
+    proximity_to_win(GameState, Player, PlayerProximity), % Proximity of player's stacks to 8
+    proximity_to_win(GameState, -Player, OpponentProximity), % For the opponent
+    Value is PlayerStacks - OpponentStacks + 
+             PlayerHeightValue - OpponentHeightValue + 
+             PlayerProximity - OpponentProximity.
+
+
+stacks_owned([Board, _, _, _, _, _, _], Player, Count) :-
+    findall([Row, Col], player_piece(Board, Player, Row, Col), Positions),
+    length(Positions, Count).
+
+%?
+stack_height_value([Board, _, _, _, _, _, _], Player, Value) :-
+    findall(Height, (player_piece(Board, Player, Row, Col), nth1(Row, Board, BoardRow), nth1(Col, BoardRow, Stack), length(Stack, Height)), Heights),
+    sum_list(Heights, Value).
+
+%?
+proximity_to_win([Board, _, _, _, _, _, _], Player, Proximity) :-
+    findall(Prox, (player_piece(Board, Player, Row, Col), nth1(Row, Board, BoardRow), nth1(Col, BoardRow, Stack), length(Stack, Height), Prox is 8 - Height), Proximities),
+    sum_list(Proximities, Proximity).
