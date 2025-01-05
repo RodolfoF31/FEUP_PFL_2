@@ -169,6 +169,12 @@ letter_column(ColLetter, ColIndex) :-
 
 play_computer_move(GameState, Level, NewGameState):-
     choose_move(GameState, Level, Move),
+    (Move = [_, _, _, _, Indexes], is_list(Indexes) ->
+        random_member(Index, Indexes),
+        MoveWithIndex = [FromRow, FromCol, ToRow, ToCol, Index]
+    ;
+        MoveWithIndex = Move
+    ),
     (Move \= [] -> move(GameState, Move, TempState);
     write('No valid moves available. Passing turn.'), nl
     ),
