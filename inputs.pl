@@ -87,7 +87,7 @@ get_player_action([Board, CurrentPlayer, BoardSize, _, _,_,_], FromRow, FromCol,
         write('Input to what stack you would like to merge and the index of the piece to split the stack'), nl,
         read_position(ToRow, ToCol, BoardSize),
         read_index(Index, BoardSize),
-        ( is_valid_move(Moves, FromRow, FromCol, ToRow, ToCol, [Index]) ->
+        ( is_valid_move(Moves, FromRow, FromCol, ToRow, ToCol, ValidIndexes), member(Index, ValidIndexes) ->
             move([Board, CurrentPlayer, BoardSize,_,_,_,_], [FromRow, FromCol, ToRow, ToCol, Index], NewGameState)
         ;
             write('Invalid move. Please try again.'), nl,
@@ -119,6 +119,13 @@ get_player_move(GameState, NewGameState) :-
 
     valid_moves(GameState, Moves),
 
+    ( Moves = [] ->
+        write('No valid moves available. Skipping turn...'), nl,
+        NextPlayer is -CurrentPlayer,
+        NewGameState = [Board, NextPlayer, BoardSize, Player1Points, Player2Points, Player1Type, Player2Type]
+        
+    ;
+
     format('Player ~w, select the piece to move:~n', [Char]),
     repeat,
     read_position(FromRow, FromCol, BoardSize),
@@ -132,7 +139,7 @@ get_player_move(GameState, NewGameState) :-
     ;
         write('You cannot play this stack right now.'), nl,
         fail
-    ).
+    )).
 
 
 

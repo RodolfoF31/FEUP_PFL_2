@@ -179,7 +179,9 @@ display_game(GameState) :-
     write('Current Player: '), write(CurrentPlayer), nl,
     (CurrentPlayer = 1 -> write('White (O)'); write('Black (X)')), nl, nl,
     %call BoardSize
-    display_board(Board,BoardSize).
+    display_board(Board,BoardSize),
+    format('White has ~d points~n', [Player1Points]),
+    format('Black has ~d points~n', [Player2Points]).
 
 
 % Display the board
@@ -226,7 +228,7 @@ clear_screen :- write('\e[2J'), !.
 % Display stacks information
 display_stacks_info([], _, _, _).
 display_stacks_info(_, RowLabel, _, BoardSize) :-
-    RowLabel >= BoardSize, !.
+    RowLabel > BoardSize, !.
 display_stacks_info([Row|Rest], RowLabel, ColLabel, BoardSize) :-
     display_row_stacks_info(Row, RowLabel, ColLabel, 1),
     NextRowLabel is RowLabel + 1,

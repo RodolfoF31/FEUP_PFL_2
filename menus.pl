@@ -1,6 +1,9 @@
 option_size(1, 8).
 option_size(2, 10).
 
+option_difficulty(1, 'Easy').
+option_difficulty(2, 'Greedy').
+
 
 %%%% Controller %%%%
 menu :-
@@ -47,6 +50,7 @@ menu_choose_level(Level):-
     menu_option_format(0,'EXIT'),
     menu_end_format,
     read_number(2,Level),
+    option_difficulty(Level, LevelOfBot),
     write('Level chosen: '), write(Level), nl.
 
 
