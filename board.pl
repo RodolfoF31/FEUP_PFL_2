@@ -75,7 +75,7 @@ empty_board_10x10([
 % Set initial pieces on the board
 initialize_board(BoardSize, Board) :-
     (BoardSize == 8 -> empty_board_8x8(EmptyBoard);
-     BoardSize == 10 -> empty_board_10x10(EmptyBoard)).
+     BoardSize == 10 -> empty_board_10x10(EmptyBoard)),
     set_pieces(EmptyBoard, Board, BoardSize).
 
 

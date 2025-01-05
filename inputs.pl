@@ -119,6 +119,13 @@ get_player_move(GameState, NewGameState) :-
 
     valid_moves(GameState, Moves),
 
+    ( Moves = [] ->
+        write('No valid moves available. Skipping turn...'), nl,
+        NextPlayer is -CurrentPlayer,
+        NewGameState = [Board, NextPlayer, BoardSize, Player1Points, Player2Points, Player1Type, Player2Type]
+        
+    ;
+
     format('Player ~w, select the piece to move:~n', [Char]),
     repeat,
     read_position(FromRow, FromCol, BoardSize),
@@ -132,7 +139,7 @@ get_player_move(GameState, NewGameState) :-
     ;
         write('You cannot play this stack right now.'), nl,
         fail
-    ).
+    )).
 
 
 
