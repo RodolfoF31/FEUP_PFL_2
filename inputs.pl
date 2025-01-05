@@ -128,6 +128,7 @@ get_player_move(GameState, NewGameState) :-
 
     format('Player ~w, select the piece to move:~n', [Char]),
     repeat,
+
     read_position(FromRow, FromCol, BoardSize),
     ( has_valid_move(Moves, FromRow, FromCol) ->
         get_player_action([Board, CurrentPlayer, BoardSize, _, _, _, _], FromRow, FromCol, TempState, Moves),

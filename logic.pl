@@ -322,7 +322,7 @@ adjacent_position_diagonal(FromRow, FromCol, ToRow, ToCol) :-
 
 choose_move(GameState, Level, Move):-
     valid_moves(GameState, Moves),
->>    (Level == 1->
+    (Level == 1->
         write('Level 1'), nl,
         random_member(M, Moves),
         (M = [FromRow, FromCol, ToRow, ToCol, Indexes], is_list(Indexes) ->
@@ -348,16 +348,27 @@ choose_move(GameState, Level, Move):-
         max_member(_-Move, ValuedMoves),!
     ).
 
-value(GameState,Player,Value):-
+value(GameState, Player, Value):-
+    Opponent is -Player,
+    write('STARTING: '), write(GameState), nl,
+    write('Player: '), write(Player), nl,
+    write('Opponent: '), write(Opponent), nl,
     stacks_owned(GameState, Player, PlayerStacks), % Count stacks owned by the player
-    stacks_owned(GameState, -Player, OpponentStacks), % Count opponent stacks
+    write('PlayerStacks: '), write(PlayerStacks), nl,
+    stacks_owned(GameState, Opponent, OpponentStacks), % Count opponent stacks
+    write('OpponentStacks: '), write(OpponentStacks), nl,
     stack_height_value(GameState, Player, PlayerHeightValue), % Value from stack heights for the player
-    stack_height_value(GameState, -Player, OpponentHeightValue), % For the opponent
+    write('PlayerHeightValue: '), write(PlayerHeightValue), nl,
+    stack_height_value(GameState, Opponent, OpponentHeightValue), % For the opponent
+    write('OpponentHeightValue: '), write(OpponentHeightValue), nl,
     proximity_to_win(GameState, Player, PlayerProximity), % Proximity of player's stacks to 8
-    proximity_to_win(GameState, -Player, OpponentProximity), % For the opponent
+    write('PlayerProximity: '), write(PlayerProximity), nl,
+    proximity_to_win(GameState, Opponent, OpponentProximity), % For the opponent
+    write('OpponentProximity: '), write(OpponentProximity), nl,
     Value is PlayerStacks - OpponentStacks + 
              PlayerHeightValue - OpponentHeightValue + 
-             PlayerProximity - OpponentProximity.
+             PlayerProximity - OpponentProximity,
+    write('Value: '), write(Value), nl.
 
 
 stacks_owned([Board, _, _, _, _, _, _], Player, Count) :-
@@ -373,3 +384,8 @@ stack_height_value([Board, _, _, _, _, _, _], Player, Value) :-
 proximity_to_win([Board, _, _, _, _, _, _], Player, Proximity) :-
     findall(Prox, (player_piece(Board, Player, Row, Col), nth1(Row, Board, BoardRow), nth1(Col, BoardRow, Stack), length(Stack, Height), Prox is 8 - Height), Proximities),
     sum_list(Proximities, Proximity).
+
+sum_list([], 0).
+sum_list([H|T], Sum) :-
+    sum_list(T, Rest),
+    Sum is H + Rest.
