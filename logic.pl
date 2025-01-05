@@ -185,15 +185,12 @@ non_isolated_moves(FromRow, FromCol, ToRow, ToCol, StackPosition, [Board, Curren
 
 move([Board, CurrentPlayer, BoardSize, _, _, _, _], [FromRow, FromCol, ToRow, ToCol, Index], [NewBoard, CurrentPlayer, BoardSize,_,_,_,_]) :-
     ( Index =\= 0 ->
-        merge_stacks(Board, FromRow, FromCol, ToRow, ToCol, Index, NewBoard),
-        write('Stack merged successfully!'), nl
-        
+        merge_stacks(Board, FromRow, FromCol, ToRow, ToCol, Index, NewBoard)
     ; 
         adjacent_position_diagonal(FromRow, FromCol, ToRow, ToCol),
         get_stack(Board, FromRow, FromCol, Stack),
         set_piece_for_basicmove(Board, FromRow, FromCol, [], TempBoard),
-        set_piece_for_basicmove(TempBoard, ToRow, ToCol, Stack, NewBoard),
-        write('Stack moved successfully!'), nl
+        set_piece_for_basicmove(TempBoard, ToRow, ToCol, Stack, NewBoard)
         
     ).
 
@@ -322,6 +319,7 @@ adjacent_position_diagonal(FromRow, FromCol, ToRow, ToCol) :-
 
 choose_move(GameState, Level, Move):-
     valid_moves(GameState, Moves),
+    GameState = [Board, CurrentPlayer, BoardSize, Player1Points, Player2Points, Player1Type, Player2Type],
     (Level == 1->
         write('Level 1'), nl,
         random_member(M, Moves),
@@ -334,42 +332,66 @@ choose_move(GameState, Level, Move):-
         !
     ;
     write('Level 2'), nl,
-       findall(Value-M, (
+    findall(Value-M, (
         member(M, Moves),
-        (M = [_, _, _, _, Indexes], is_list(Indexes) ->
-            random_member(Index, Indexes),
+        (M = [FromRow, FromCol, ToRow, ToCol, Indexes], is_list(Indexes) ->
+            member(Index, Indexes),
             MoveWithIndex = [FromRow, FromCol, ToRow, ToCol, Index]
         ;
             MoveWithIndex = M
         ),
-        move(GameState, MoveWithIndex, NewGameState)
-        %value(NewGameState, Player, Value)
-        ), ValuedMoves),
-        max_member(_-Move, ValuedMoves),!
+        move(GameState, MoveWithIndex, TempState),
+        TempState = [NewBoard, CurrentPlayer, BoardSize, _, _, _, _],
+        NewGameState = [NewBoard, CurrentPlayer, BoardSize, Player1Points, Player2Points, Player1Type, Player2Type],
+        value(NewGameState, CurrentPlayer, Value),
+        write('Move: '), write(MoveWithIndex), write(' Value: '), write(Value), nl
+    ), ValuedMoves),
+    write('All valued moves: '), write(ValuedMoves), nl,
+    max_member(V-Move, ValuedMoves),
+    write('Chosen move: '), write(Move),write('Valeu->'),write(V), nl,sleep(3),
+    !
     ).
 
 value(GameState, Player, Value):-
     Opponent is -Player,
-    write('STARTING: '), write(GameState), nl,
-    write('Player: '), write(Player), nl,
-    write('Opponent: '), write(Opponent), nl,
+    win_stack(GameState, Player, WinStack),
+    win_stack(GameState, Opponent, OpponentWinStack),
     stacks_owned(GameState, Player, PlayerStacks), % Count stacks owned by the player
-    write('PlayerStacks: '), write(PlayerStacks), nl,
+    top_stack_owned(GameState, Player, PlayerTopStacks), % Count stacks owned by the player
+    top_stack_owned(GameState,Opponent,OpponentTopStacks), % Count stacks owned by the player
     stacks_owned(GameState, Opponent, OpponentStacks), % Count opponent stacks
-    write('OpponentStacks: '), write(OpponentStacks), nl,
     stack_height_value(GameState, Player, PlayerHeightValue), % Value from stack heights for the player
-    write('PlayerHeightValue: '), write(PlayerHeightValue), nl,
     stack_height_value(GameState, Opponent, OpponentHeightValue), % For the opponent
-    write('OpponentHeightValue: '), write(OpponentHeightValue), nl,
     proximity_to_win(GameState, Player, PlayerProximity), % Proximity of player's stacks to 8
-    write('PlayerProximity: '), write(PlayerProximity), nl,
     proximity_to_win(GameState, Opponent, OpponentProximity), % For the opponent
-    write('OpponentProximity: '), write(OpponentProximity), nl,
-    Value is PlayerStacks - OpponentStacks + 
+    Value is WinStack-OpponentWinStack + PlayerTopStacks-OpponentTopStacks +PlayerStacks - OpponentStacks + 
              PlayerHeightValue - OpponentHeightValue + 
-             PlayerProximity - OpponentProximity,
-    write('Value: '), write(Value), nl.
+             PlayerProximity - OpponentProximity.
 
+win_stack([Board, _, _, _, _, _, _], Player, WinStack) :-
+    findall([Row, Col], (nth1(Row, Board, BoardRow), nth1(Col, BoardRow, Piece), Piece \= []), AllPieces),
+    findall(
+        [Row, Col],
+        (member([Row, Col], AllPieces),
+        get_stack_pieces(Board, Row, Col, Stack),
+        length(Stack, 8),
+        last_or_single(Stack, Player)
+        ),
+        WinStacks
+    ),
+    length(WinStacks, Length),
+    WinStack is Length * 100000.
+
+top_stack_owned([Board, _, _, _, _, _, _], Player, Count) :-
+    findall([Row, Col], 
+        (nth1(Row, Board, BoardRow), 
+        nth1(Col, BoardRow, Stack), 
+        Stack \= [], 
+        last_or_single(Stack, Player)), 
+        Positions),
+    write('Top stack owned: '), write(Positions), nl,
+    length(Positions, Temp),
+    Count = Temp * 10.
 
 stacks_owned([Board, _, _, _, _, _, _], Player, Count) :-
     findall([Row, Col], player_piece(Board, Player, Row, Col), Positions),

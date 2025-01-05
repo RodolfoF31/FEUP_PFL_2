@@ -19,9 +19,6 @@ initial_state(GameConfig, GameState):-
     ;
     Mode = 'Pvc' ->
         game_loop_pvc(GameState)
-    ;
-    Mode = 'Cvc' ->
-        game_loop_cvc(GameState)
     
     ).
 

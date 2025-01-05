@@ -170,6 +170,7 @@ letter_column(ColLetter, ColIndex) :-
 
 play_computer_move(GameState, Level, NewGameState):-
     GameState = [Board, CurrentPlayer, BoardSize, Player1Points, Player2Points, Player1Type, Player2Type],
+    write('--- Computer Move ------------------------------------------------------------------------------------------------'),write(Level), nl,
     choose_move(GameState, Level, Move),
     (Move = [_, _, _, _, Indexes], is_list(Indexes) ->
         random_member(Index, Indexes),
